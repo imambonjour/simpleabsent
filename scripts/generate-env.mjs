@@ -35,7 +35,6 @@ const config = {
 const missing = [
   !config.SUPABASE_URL && 'SUPABASE_URL / NEXT_PUBLIC_SUPABASE_URL',
   !config.SUPABASE_ANON_KEY && 'SUPABASE_ANON_KEY / NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',
-  !config.ADMIN_PASSWORD && 'ADMIN_PASSWORD',
 ].filter(Boolean);
 
 if (missing.length > 0) {
