@@ -1,7 +1,10 @@
 /**
  * Simple Absent Page Logic
  * ========================
- * Handles: name/class/absent number form -> Supabase insert.
+ * Fetches roster from Supabase `absen` table.
+ * The `absen` table has columns: id (int8), class (int8), name (text), stats (bool).
+ * Class selector filters the name dropdown by the `class` column.
+ * On submit, updates `stats` from false → true for the selected student.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,42 +12,50 @@ document.addEventListener('DOMContentLoaded', () => {
     window.lucide.createIcons();
   }
 
-  const absentForm = document.getElementById('absent-form');
-  const inputName = document.getElementById('input-name');
-  const inputClass = document.getElementById('input-class');
-  const inputAbsentNumber = document.getElementById('input-absent-number');
-  const formError = document.getElementById('absent-error');
-  const btnSubmit = document.getElementById('btn-submit-absent');
-  const setupNotice = document.getElementById('setup-notice');
+  const absentForm     = document.getElementById('absent-form');
+  const inputClass     = document.getElementById('input-class');
+  const inputName      = document.getElementById('input-name');
+  const formError      = document.getElementById('absent-error');
+  const btnSubmit      = document.getElementById('btn-submit-absent');
+  const setupNotice    = document.getElementById('setup-notice');
   const successSection = document.getElementById('success-section');
-  const successDetail = document.getElementById('success-detail');
-  const btnAddAnother = document.getElementById('btn-add-another');
+  const successDetail  = document.getElementById('success-detail');
+  const btnAddAnother  = document.getElementById('btn-add-another');
 
-  fillAbsentNumbers();
+  /** @type {Map<string, Array<{id: number, name: string, class: number, stats: boolean}>>} */
+  const rosterByClass = new Map();
+
   showSetupNoticeIfNeeded();
+  loadRoster();
 
+  // ── Class selector change ──────────────────────────────────────────────────
+  inputClass.addEventListener('change', () => {
+    populateNameOptions(inputClass.value);
+  });
+
+  // ── Form submit ────────────────────────────────────────────────────────────
   absentForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    const studentName = inputName.value.trim();
-    const studentClass = inputClass.value.trim();
-    const absentNumber = Number(inputAbsentNumber.value);
-
-    if (!studentName) {
-      showError('Silakan masukkan nama.');
-      inputName.focus();
-      return;
-    }
+    const studentClass = inputClass.value;
+    const studentId    = inputName.value;
+    const student      = getRosterEntry(studentClass, studentId);
 
     if (!studentClass) {
-      showError('Silakan masukkan kelas.');
+      showError('Silakan pilih kelas.');
       inputClass.focus();
       return;
     }
 
-    if (!Number.isInteger(absentNumber) || absentNumber < 1) {
-      showError('Silakan pilih nomor absen.');
-      inputAbsentNumber.focus();
+    if (!studentId || !student) {
+      showError('Silakan pilih nama dari kelas yang sesuai.');
+      inputName.focus();
+      return;
+    }
+
+    if (student.stats === true) {
+      showError('Nama ini sudah absen sebelumnya!');
+      showToast('Sudah absen sebelumnya', 'warning');
       return;
     }
 
@@ -53,32 +64,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const db = getDB();
-      if (!db) {
-        throw new Error('Supabase belum dikonfigurasi.');
-      }
+      if (!db) throw new Error('Supabase belum dikonfigurasi.');
 
-      const payload = {
-        student_name: studentName,
-        student_class: studentClass,
-        absent_number: absentNumber,
-      };
-
+      // Update stats from false → true
       const { error } = await db
-        .from('absensi')
-        .insert(payload);
+        .from('absen')
+        .update({ stats: true })
+        .eq('id', student.id);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      showSuccess(payload);
+      // Update local cache
+      student.stats = true;
+
+      showSuccess(student);
       showToast('Absensi tersimpan', 'success');
       absentForm.reset();
-      fillAbsentNumbers();
-      inputName.focus();
-    } catch (error) {
-      console.error('[student] submit absent error:', error);
-      showError(getSubmitErrorMessage(error));
+      resetNameSelector();
+      inputClass.focus();
+    } catch (err) {
+      console.error('[student] submit error:', err);
+      showError(getSubmitErrorMessage(err));
       showToast('Gagal menyimpan absensi', 'error');
     } finally {
       setLoading(false);
@@ -87,47 +93,106 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnAddAnother.addEventListener('click', () => {
     successSection.classList.add('hidden');
-    inputName.focus();
+    inputClass.focus();
   });
 
-  function fillAbsentNumbers() {
-    const selectedValue = inputAbsentNumber.value;
-    inputAbsentNumber.innerHTML = '<option value="">Pilih nomor</option>';
-
-    for (let number = 1; number <= 40; number += 1) {
-      const option = document.createElement('option');
-      option.value = String(number);
-      option.textContent = String(number).padStart(2, '0');
-      inputAbsentNumber.appendChild(option);
+  // ── Roster loading from Supabase ───────────────────────────────────────────
+  async function loadRoster() {
+    const db = getDB();
+    if (!db) {
+      showError('Supabase belum dikonfigurasi. Pastikan js/env.js sudah dihasilkan.');
+      return;
     }
 
-    inputAbsentNumber.value = selectedValue;
+    try {
+      // Fetch all students from `absen` table
+      const { data, error } = await db
+        .from('absen')
+        .select('id, class, name, stats')
+        .order('name');
+
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        showError('Daftar siswa kosong. Import data ke tabel absen di Supabase terlebih dahulu.');
+        return;
+      }
+
+      data.forEach(row => {
+        const classCode = String(row.class);
+        if (!classCode) return;
+
+        if (!rosterByClass.has(classCode)) {
+          rosterByClass.set(classCode, []);
+        }
+        rosterByClass.get(classCode).push({
+          id: row.id,
+          name: row.name,
+          class: row.class,
+          stats: row.stats,
+        });
+      });
+
+      showToast('Daftar nama berhasil dimuat', 'info');
+    } catch (err) {
+      console.error('[student] roster load error:', err);
+      showError('Gagal memuat daftar nama dari Supabase.');
+    }
   }
 
+  // ── Name dropdown helpers ──────────────────────────────────────────────────
+  function populateNameOptions(classCode) {
+    const entries = rosterByClass.get(classCode) || [];
+    inputName.innerHTML = '<option value="">Pilih nama</option>';
+    inputName.disabled  = true;
+
+    if (entries.length === 0) {
+      inputName.innerHTML = '<option value="">Tidak ada nama untuk kelas ini</option>';
+      return;
+    }
+
+    entries.forEach(entry => {
+      const option       = document.createElement('option');
+      option.value       = entry.id;
+      option.textContent = entry.name;
+      // Mark already-absent students
+      if (entry.stats === true) {
+        option.textContent += ' ✓ (sudah absen)';
+        option.style.color = '#3B6D11';
+      }
+      inputName.appendChild(option);
+    });
+
+    inputName.disabled = false;
+  }
+
+  function resetNameSelector() {
+    inputName.innerHTML = '<option value="">Pilih kelas dulu</option>';
+    inputName.disabled  = true;
+  }
+
+  function getRosterEntry(classCode, studentId) {
+    const entries = rosterByClass.get(classCode) || [];
+    return entries.find(e => String(e.id) === String(studentId)) || null;
+  }
+
+  // ── UI helpers ─────────────────────────────────────────────────────────────
   function showSetupNoticeIfNeeded() {
     const isConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
     setupNotice.classList.toggle('hidden', isConfigured);
   }
 
   function showSuccess(record) {
-    const number = String(record.absent_number).padStart(2, '0');
-    successDetail.textContent = `${record.student_name} - Kelas ${record.student_class} - No. ${number}`;
+    successDetail.textContent = `${record.name} — Kelas ${record.class}`;
     successSection.classList.remove('hidden');
   }
 
-  function getSubmitErrorMessage(error) {
+  function getSubmitErrorMessage(err) {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       return 'Supabase belum diset. Isi .env, jalankan node scripts/generate-env.mjs, lalu buka ulang halaman.';
     }
-
-    if (error && error.code === '23505') {
-      return 'Data ini sudah pernah masuk. Periksa nama, kelas, dan nomor absen.';
+    if (err && /relation .*absen.* does not exist/i.test(err.message || '')) {
+      return 'Tabel absen belum dibuat di Supabase.';
     }
-
-    if (error && /relation .*absensi.* does not exist/i.test(error.message || '')) {
-      return 'Tabel absensi belum dibuat di Supabase. Jalankan SQL dari guide_supabase.md.';
-    }
-
     return 'Terjadi kesalahan saat menyimpan. Periksa koneksi dan setup Supabase.';
   }
 

@@ -27,7 +27,7 @@
       <header class="header">
         <div class="header__icon" aria-hidden="true"><i data-lucide="clipboard-check"></i></div>
         <h1 class="header__title">Simple Absent</h1>
-        <p class="header__subtitle">Masukkan nama, kelas, dan nomor absen.</p>
+        <p class="header__subtitle">Pilih kelas, lalu pilih namamu.</p>
       </header>
 
       <section id="setup-notice" class="setup-notice hidden" aria-label="Setup Supabase">
@@ -41,19 +41,6 @@
       <section class="card">
         <form id="absent-form" novalidate>
           <div class="form-group">
-            <label for="input-name" class="form-label">Nama</label>
-            <input
-              type="text"
-              id="input-name"
-              class="form-input"
-              placeholder="Contoh: Ahmad Maulana"
-              required
-              autocomplete="name"
-              autofocus
-            >
-          </div>
-
-          <div class="form-group">
             <label for="input-class" class="form-label">Kelas</label>
             <select
               id="input-class"
@@ -61,26 +48,32 @@
               required
             >
               <option value="">Pilih kelas</option>
-              <option value="12-01">12-01</option>
-              <option value="12-02">12-02</option>
-              <option value="12-03">12-03</option>
-              <option value="12-04">12-04</option>
-              <option value="12-05">12-05</option>
-              <option value="12-06">12-06</option>
-              <option value="12-07">12-07</option>
-              <option value="12-08">12-08</option>
-              <option value="12-09">12-09</option>
-              <option value="12-10">12-10</option>
+              <option value="1201">12-01</option>
+              <option value="1202">12-02</option>
+              <option value="1203">12-03</option>
+              <option value="1204">12-04</option>
+              <option value="1205">12-05</option>
+              <option value="1206">12-06</option>
+              <option value="1207">12-07</option>
+              <option value="1208">12-08</option>
+              <option value="1209">12-09</option>
+              <option value="1210">12-10</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label for="input-absent-number" class="form-label">Nomor Absen</label>
-            <select id="input-absent-number" class="form-input" required>
-              <option value="">Pilih nomor</option>
+            <label for="input-name" class="form-label">Nama</label>
+            <select
+              id="input-name"
+              class="form-input"
+              required
+              disabled
+            >
+              <option value="">Pilih kelas dulu</option>
             </select>
-            <span class="form-hint">Pilihan tersedia dari 01 sampai 40.</span>
+            <span class="form-hint">Nama akan muncul setelah memilih kelas.</span>
           </div>
+
 
           <div id="absent-error" class="form-error" role="alert" aria-live="polite"></div>
 
