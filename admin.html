@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Admin Panel — Upload data siswa, lihat dashboard distribusi konsumsi.">
+  <title>Admin Panel — QR Konsumsi</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__brand" id="nav-brand"><i data-lucide="graduation-cap"></i> QR Konsumsi</a>
+      <ul class="nav__links">
+        <li><a href="index.html" class="nav__link" id="nav-home">Siswa</a></li>
+        <li><a href="scan.html" class="nav__link" id="nav-scan">Scan</a></li>
+        <li><a href="admin.html" class="nav__link nav__link--active" id="nav-admin">Admin</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="page-wrapper" style="padding-top: 80px;">
+    <div class="container">
+
+      <!-- Password Gate (shown first) -->
+      <section id="auth-section">
+        <div class="container container--narrow">
+          <header class="header">
+            <div class="header__icon" aria-hidden="true"><i data-lucide="lock"></i></div>
+            <h1 class="header__title">Admin Panel</h1>
+            <p class="header__subtitle">Masukkan password untuk mengakses dashboard</p>
+          </header>
+
+          <div class="card">
+            <form id="auth-form" novalidate>
+              <div class="form-group">
+                <label for="input-password" class="form-label">Password</label>
+                <input 
+                  type="password" 
+                  id="input-password" 
+                  class="form-input"
+                  placeholder="Masukkan password admin"
+                  required
+                  autofocus
+                >
+              </div>
+              <div id="auth-error" class="form-error" role="alert" aria-live="polite"></div>
+              <button type="submit" id="btn-auth" class="btn btn--primary btn--full btn--lg mt-4">
+                <i data-lucide="unlock"></i> Masuk
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dashboard (hidden until authenticated) -->
+      <section id="dashboard-section" class="hidden">
+
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6" style="flex-wrap: wrap; gap: var(--space-4);">
+          <div>
+            <h1 style="display: flex; align-items: center; gap: 8px;"><i data-lucide="bar-chart-3" style="width: 28px; height: 28px; color: var(--accent);"></i> Dashboard</h1>
+            <p class="text-muted" style="font-size: var(--text-sm);">Monitor distribusi konsumsi secara realtime</p>
+          </div>
+          <button type="button" id="btn-logout" class="btn btn--ghost btn--sm"><i data-lucide="log-out"></i> Logout</button>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid mb-6" id="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card__value text-espresso" id="stat-total">0</div>
+            <div class="stat-card__label">Total Siswa</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__value" style="color: var(--success-icon);" id="stat-claimed">0</div>
+            <div class="stat-card__label">Sudah Ambil</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__value" style="color: var(--warning-icon);" id="stat-unclaimed">0</div>
+            <div class="stat-card__label">Belum Ambil</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__value text-accent" id="stat-percent">0%</div>
+            <div class="stat-card__label">Progress</div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="card mb-6" style="padding: var(--space-4);">
+          <div class="flex justify-between mb-4" style="font-size: var(--text-sm);">
+            <span class="text-muted">Progress Distribusi</span>
+            <span id="progress-text" class="text-accent" style="font-weight: 500;">0 / 0</span>
+          </div>
+          <div class="progress">
+            <div class="progress__bar" id="progress-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- Upload CSV Section -->
+        <div class="card mb-6">
+          <h3 class="mb-4" style="display: flex; align-items: center; gap: 8px;"><i data-lucide="upload" style="width: 20px; height: 20px;"></i> Upload Data Siswa (CSV)</h3>
+          <p style="font-size: var(--text-sm); color: var(--warm-600); margin-bottom: var(--space-4);">
+            Format header: <code style="background: var(--warm-100); padding: 2px 8px; border-radius: 4px; font-size: var(--text-xs);">id,nama</code>
+          </p>
+
+          <div class="upload-area" id="upload-area">
+            <input type="file" id="csv-input" accept=".csv,text/csv" aria-label="Upload file CSV">
+            <div class="upload-area__icon" aria-hidden="true"><i data-lucide="file-spreadsheet"></i></div>
+            <div class="upload-area__text">Klik atau drag file CSV ke sini</div>
+            <div class="upload-area__hint">Maks 1 file • Format .csv</div>
+          </div>
+
+          <!-- CSV Preview (hidden until file uploaded) -->
+          <div id="csv-preview" class="hidden mt-6">
+            <div class="flex justify-between items-center mb-4">
+              <h4>Preview Data</h4>
+              <span class="badge badge--info" id="csv-count">0 baris</span>
+            </div>
+            
+            <div id="csv-errors" class="hidden mb-4" style="background: var(--error-bg); color: var(--error-icon); padding: var(--space-3); border-radius: var(--radius-sm); font-size: var(--text-sm);"></div>
+
+            <div class="table-wrapper" style="max-height: 300px; overflow-y: auto;">
+              <table class="table" id="csv-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>ID Siswa</th>
+                    <th>Nama</th>
+                  </tr>
+                </thead>
+                <tbody id="csv-tbody"></tbody>
+              </table>
+            </div>
+
+            <div class="flex gap-3 mt-4" style="justify-content: flex-end;">
+              <button type="button" id="btn-cancel-upload" class="btn btn--ghost btn--sm">Batal</button>
+              <button type="button" id="btn-confirm-upload" class="btn btn--primary btn--sm">
+                <i data-lucide="check"></i> Import ke Database
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student Table -->
+        <div class="card">
+          <div class="flex justify-between items-center mb-4" style="flex-wrap: wrap; gap: var(--space-3);">
+            <h3 style="display: flex; align-items: center; gap: 8px;"><i data-lucide="users" style="width: 20px; height: 20px;"></i> Daftar Siswa</h3>
+            <div class="flex gap-2">
+              <input 
+                type="search" 
+                id="search-input" 
+                class="form-input" 
+                placeholder="Cari ID / nama..."
+                style="max-width: 250px; min-height: 36px; font-size: var(--text-sm);"
+              >
+              <select id="filter-status" class="form-input" style="max-width: 150px; min-height: 36px; font-size: var(--text-sm);">
+                <option value="all">Semua</option>
+                <option value="claimed">Sudah Ambil</option>
+                <option value="unclaimed">Belum Ambil</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-wrapper" style="max-height: 500px; overflow-y: auto;">
+            <table class="table" id="student-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>ID Siswa</th>
+                  <th>Nama</th>
+                  <th>Status</th>
+                  <th>Waktu Ambil</th>
+                </tr>
+              </thead>
+              <tbody id="student-tbody"></tbody>
+            </table>
+          </div>
+
+          <!-- Empty State -->
+          <div id="empty-state" class="empty-state hidden">
+            <div class="empty-state__icon" aria-hidden="true"><i data-lucide="clipboard-list"></i></div>
+            <div class="empty-state__text">Belum ada data siswa</div>
+            <div class="empty-state__hint">Upload file CSV untuk memulai</div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script src="js/env.js"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

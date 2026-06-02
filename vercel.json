@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "buildCommand": "node scripts/generate-env.mjs",
+  "outputDirectory": ".",
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/scan", "destination": "/scan.html" }
+  ]
+}

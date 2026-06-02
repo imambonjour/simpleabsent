@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Simple Absent - form absensi sederhana dengan Supabase.">
+  <title>Simple Absent</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__brand" id="nav-brand"><i data-lucide="clipboard-check"></i> Simple Absent</a>
+      <ul class="nav__links">
+        <li><a href="index.html" class="nav__link nav__link--active" id="nav-home">Absensi</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="page-wrapper" style="padding-top: 80px;">
+    <div class="container container--narrow">
+
+      <header class="header">
+        <div class="header__icon" aria-hidden="true"><i data-lucide="clipboard-check"></i></div>
+        <h1 class="header__title">Simple Absent</h1>
+        <p class="header__subtitle">Masukkan nama, kelas, dan nomor absen.</p>
+      </header>
+
+      <section id="setup-notice" class="setup-notice hidden" aria-label="Setup Supabase">
+        <div class="setup-notice__icon" aria-hidden="true"><i data-lucide="settings"></i></div>
+        <div>
+          <h2 class="setup-notice__title">Placeholder setup Supabase</h2>
+          <p class="setup-notice__text">Isi file <code>.env</code> dari <code>.env.example</code>, lalu jalankan <code>node scripts/generate-env.mjs</code>.</p>
+        </div>
+      </section>
+
+      <section class="card">
+        <form id="absent-form" novalidate>
+          <div class="form-group">
+            <label for="input-name" class="form-label">Nama</label>
+            <input
+              type="text"
+              id="input-name"
+              class="form-input"
+              placeholder="Contoh: Ahmad Maulana"
+              required
+              autocomplete="name"
+              autofocus
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="input-class" class="form-label">Kelas</label>
+            <select
+              id="input-class"
+              class="form-input"
+              required
+            >
+              <option value="">Pilih kelas</option>
+              <option value="12-01">12-01</option>
+              <option value="12-02">12-02</option>
+              <option value="12-03">12-03</option>
+              <option value="12-04">12-04</option>
+              <option value="12-05">12-05</option>
+              <option value="12-06">12-06</option>
+              <option value="12-07">12-07</option>
+              <option value="12-08">12-08</option>
+              <option value="12-09">12-09</option>
+              <option value="12-10">12-10</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="input-absent-number" class="form-label">Nomor Absen</label>
+            <select id="input-absent-number" class="form-input" required>
+              <option value="">Pilih nomor</option>
+            </select>
+            <span class="form-hint">Pilihan tersedia dari 01 sampai 40.</span>
+          </div>
+
+          <div id="absent-error" class="form-error" role="alert" aria-live="polite"></div>
+
+          <button type="submit" id="btn-submit-absent" class="btn btn--primary btn--full btn--lg mt-4">
+            <i data-lucide="send"></i> Simpan Absensi
+          </button>
+        </form>
+      </section>
+
+      <section id="success-section" class="card hidden" aria-live="polite">
+        <div class="scan-result scan-result--success">
+          <div class="scan-result__icon" aria-hidden="true"><i data-lucide="check-circle-2"></i></div>
+          <div class="scan-result__title">Absensi Tersimpan</div>
+          <div class="scan-result__detail" id="success-detail"></div>
+          <button type="button" id="btn-add-another" class="btn btn--outline btn--sm mt-4">
+            <i data-lucide="plus"></i> Tambah Lagi
+          </button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="js/env.js"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/student.js"></script>
+</body>
+</html>
