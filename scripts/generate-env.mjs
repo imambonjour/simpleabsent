@@ -1,7 +1,5 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 
-const requiredKeys = ['SUPABASE_URL', 'SUPABASE_ANON_KEY', 'ADMIN_PASSWORD'];
-
 function parseEnv(text) {
   return text.split(/\r?\n/).reduce((env, line) => {
     const trimmed = line.trim();
@@ -27,22 +25,24 @@ function parseEnv(text) {
 
 const fileEnv = existsSync('.env') ? parseEnv(readFileSync('.env', 'utf8')) : {};
 const env = { ...fileEnv, ...process.env };
-const missing = requiredKeys.filter(key => !env[key]);
+
+const config = {
+  SUPABASE_URL: env.SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL,
+  SUPABASE_ANON_KEY: env.SUPABASE_ANON_KEY || env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+  ADMIN_PASSWORD: env.ADMIN_PASSWORD,
+};
+
+const missing = [
+  !config.SUPABASE_URL && 'SUPABASE_URL / NEXT_PUBLIC_SUPABASE_URL',
+  !config.SUPABASE_ANON_KEY && 'SUPABASE_ANON_KEY / NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',
+  !config.ADMIN_PASSWORD && 'ADMIN_PASSWORD',
+].filter(Boolean);
 
 if (missing.length > 0) {
   console.error(`Missing required .env values: ${missing.join(', ')}`);
   process.exit(1);
 }
 
-const config = {
-  SUPABASE_URL: env.SUPABASE_URL,
-  SUPABASE_ANON_KEY: env.SUPABASE_ANON_KEY,
-  ADMIN_PASSWORD: env.ADMIN_PASSWORD,
-};
-
-writeFileSync(
-  'js/env.js',
-  `window.APP_CONFIG = ${JSON.stringify(config, null, 2)};\n`,
-);
+writeFileSync('js/env.js', `window.APP_CONFIG = ${JSON.stringify(config, null, 2)};\n`);
 
 console.log('Generated js/env.js from .env');

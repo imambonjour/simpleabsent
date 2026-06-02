@@ -26,8 +26,8 @@ CREATE INDEX idx_absensi_created_at ON absensi(created_at);
 3. Copy `.env.example` menjadi `.env`, lalu isi placeholder:
 
 ```env
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_ANON_KEY=your-supabase-anon-or-publishable-key
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-anon-or-publishable-key
 ADMIN_PASSWORD=change-this-password
 ```
 
@@ -158,8 +158,8 @@ $$;
 2. Isi nilai berikut di `.env`:
 
 ```env
-SUPABASE_URL=PASTE_PROJECT_URL_DISINI
-SUPABASE_ANON_KEY=PASTE_ANON_KEY_DISINI
+NEXT_PUBLIC_SUPABASE_URL=PASTE_PROJECT_URL_DISINI
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=PASTE_ANON_KEY_DISINI
 ADMIN_PASSWORD=ganti-password-admin
 ```
 
