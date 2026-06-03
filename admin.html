@@ -7,6 +7,7 @@
   <title>Admin Panel — QR Konsumsi</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/theme-effects.js"></script>
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Lucide Icons -->
@@ -17,7 +18,7 @@
   <!-- Navigation -->
   <nav class="nav" role="navigation" aria-label="Main navigation">
     <div class="nav__inner">
-      <a href="index.html" class="nav__brand" id="nav-brand"><i data-lucide="graduation-cap"></i> QR Konsumsi</a>
+      <a href="index.html" class="nav__brand" id="nav-brand"><i data-lucide="lock"></i> QR Konsumsi</a>
       <ul class="nav__links">
         <li><a href="index.html" class="nav__link" id="nav-home">Siswa</a></li>
         <li><a href="scan.html" class="nav__link" id="nav-scan">Scan</a></li>
@@ -200,5 +201,9 @@
   <script src="js/env.js"></script>
   <script src="js/supabase-config.js"></script>
   <script src="js/admin.js"></script>
+  <script src="js/theme-effects.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
 </body>
 </html>

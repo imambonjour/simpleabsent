@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Create leaf container
+  // Pixel particle container - retro digital effect
   const container = document.createElement('div');
-  container.className = 'leaf-container';
+  container.className = 'pixel-container';
   container.style.position = 'fixed';
   container.style.top = '0';
   container.style.left = '0';
@@ -12,30 +12,32 @@ document.addEventListener('DOMContentLoaded', () => {
   container.style.overflow = 'hidden';
   document.body.appendChild(container);
 
-  // CSS for leaf falling
+  // CSS for pixel particles
   const style = document.createElement('style');
   style.textContent = `
-    .leaf {
+    .pixel {
       position: absolute;
-      top: -20px;
-      border-radius: 0 50% 0 50%;
-      opacity: 0.8;
+      width: 4px;
+      height: 4px;
+      image-rendering: pixelated;
+      shape-rendering: crispEdges;
+      opacity: 0.6;
       pointer-events: none;
-      animation: fall linear infinite;
+      animation: float-pixel linear infinite;
     }
-    @keyframes fall {
+    @keyframes float-pixel {
       0% {
-        transform: translateY(-20px) rotate(0deg) translateX(0);
+        transform: translateY(100vh) scale(1);
         opacity: 0;
       }
       10% {
-        opacity: 0.8;
+        opacity: 0.6;
       }
       90% {
-        opacity: 0.8;
+        opacity: 0.6;
       }
       100% {
-        transform: translateY(105vh) rotate(360deg) translateX(80px);
+        transform: translateY(-20px) scale(1);
         opacity: 0;
       }
     }
@@ -43,51 +45,43 @@ document.addEventListener('DOMContentLoaded', () => {
   document.head.appendChild(style);
 
   const colors = [
-    '#A3C9A8', // Sage green soft
-    '#70A9A1', // Watercolor teal
-    '#FFCAD4', // Pink petal soft
-    '#F4A261', // Soft orange
+    '#5FA762', // Pixel green
+    '#4A90C8', // Pixel blue
+    '#E8953C', // Pixel orange
+    '#D14949', // Pixel red
   ];
 
-  function spawnLeaf() {
-    if (document.hidden) return; // Don't run when tab is inactive
-    if (container.childElementCount > 25) return; // Limit total elements for performance
+  function spawnPixel() {
+    if (document.hidden) return;
+    if (container.childElementCount > 30) return;
 
-    const leaf = document.createElement('div');
-    leaf.className = 'leaf';
+    const pixel = document.createElement('div');
+    pixel.className = 'pixel';
     
-    // Random sizes, speeds and positions
-    const size = Math.random() * 12 + 8; // 8px to 20px
-    const duration = Math.random() * 8 + 6; // 6s to 14s
-    const left = Math.random() * 100; // 0% to 100%
+    const size = Math.random() > 0.7 ? 8 : 4; // Some bigger pixels
+    const duration = Math.random() * 10 + 8;
+    const left = Math.random() * 100;
     const delay = Math.random() * 5;
     const color = colors[Math.floor(Math.random() * colors.length)];
     
-    leaf.style.width = `${size}px`;
-    leaf.style.height = `${size * 1.5}px`;
-    leaf.style.backgroundColor = color;
-    leaf.style.left = `${left}vw`;
-    leaf.style.animationDuration = `${duration}s`;
-    leaf.style.animationDelay = `-${delay}s`; // Negative delay so they start immediately distributed
+    pixel.style.width = `${size}px`;
+    pixel.style.height = `${size}px`;
+    pixel.style.backgroundColor = color;
+    pixel.style.left = `${left}vw`;
+    pixel.style.bottom = '-10px';
+    pixel.style.animationDuration = `${duration}s`;
+    pixel.style.animationDelay = `-${delay}s`;
     
-    // Soft hand-drawn shape variation
-    if (Math.random() > 0.5) {
-      leaf.style.borderRadius = '50% 0 50% 0';
-    }
+    container.appendChild(pixel);
 
-    container.appendChild(leaf);
-
-    // Remove when animation finishes
     setTimeout(() => {
-      leaf.remove();
+      pixel.remove();
     }, duration * 1000);
   }
 
-  // Initial batch
-  for (let i = 0; i < 15; i++) {
-    spawnLeaf();
+  for (let i = 0; i < 20; i++) {
+    spawnPixel();
   }
 
-  // Continuous spawning
-  setInterval(spawnLeaf, 800);
+  setInterval(spawnPixel, 600);
 });
