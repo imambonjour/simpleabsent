@@ -62,25 +62,21 @@
             </select>
           </div>
 
-          <button type="submit" id="btn-submit" class="btn btn--primary btn--full btn--lg mt-4">
+          <button type="submit" id="btn-submit-absent" class="btn btn--primary btn--full btn--lg mt-4">
             <i data-lucide="check-circle"></i>
             <span>Absen Sekarang</span>
           </button>
         </form>
-      </section>
 
-      <section id="qr-section" class="card hidden">
-        <div class="qr-container">
-          <div class="qr-frame">
-            <canvas id="qr-canvas"></canvas>
-          </div>
-          <div class="qr-info">
-            <p class="qr-info__name" id="qr-name"></p>
-            <p class="qr-info__class" id="qr-class"></p>
-          </div>
-          <button id="btn-back" class="btn btn--outline btn--sm">
-            <i data-lucide="arrow-left"></i>
-            <span>Kembali</span>
+        <div id="absent-error" class="form-error" role="alert" aria-live="polite"></div>
+
+        <div id="success-section" class="hidden mt-6" style="text-align: center;">
+          <div style="font-size: 3rem; color: var(--success-icon); margin-bottom: var(--space-2);">✓</div>
+          <h3 style="color: var(--success-text);">Absensi Berhasil!</h3>
+          <p id="success-detail" style="color: var(--text-muted); margin-bottom: var(--space-4);"></p>
+          <button type="button" id="btn-add-another" class="btn btn--outline">
+            <i data-lucide="user-plus"></i>
+            <span>Absen Lagi</span>
           </button>
         </div>
       </section>
@@ -94,17 +90,11 @@
         <i data-lucide="qr-code"></i>
         QR Absensi
       </a>
-      <ul class="nav__links">
-        <li><a href="/" class="nav__link nav__link--active">Home</a></li>
-        <li><a href="/scan.html" class="nav__link">Scan</a></li>
-        <li><a href="/admin.html" class="nav__link">Admin</a></li>
-      </ul>
     </div>
   </nav>
 
   <script src="js/supabase-config.js"></script>
   <script src="js/student.js"></script>
-  <script src="js/theme-effects.js"></script>
   <script>
     lucide.createIcons();
   </script>
