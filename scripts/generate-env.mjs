@@ -24,6 +24,7 @@ function parseEnv(text) {
 }
 
 const fileEnv = existsSync('.env') ? parseEnv(readFileSync('.env', 'utf8')) : {};
+// On Vercel, process.env contains all environment variables from dashboard
 const env = { ...fileEnv, ...process.env };
 
 const config = {
@@ -38,7 +39,8 @@ const missing = [
 ].filter(Boolean);
 
 if (missing.length > 0) {
-  console.error(`Missing required .env values: ${missing.join(', ')}`);
+  console.error(`Missing required environment variables: ${missing.join(', ')}`);
+  console.error('Make sure you have set these in Vercel Dashboard > Settings > Environment Variables');
   process.exit(1);
 }
 
