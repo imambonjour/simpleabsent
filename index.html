@@ -8,7 +8,7 @@
   <title>Tricatur Bimantara - Absensi Angkatan 34</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link
-    href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Fredoka:wght@600;700&family=Pacifico&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -16,11 +16,6 @@
 </head>
 
 <body>
-
-  <!-- Background Blobs -->
-  <div class="blob blob--1" aria-hidden="true"></div>
-  <div class="blob blob--2" aria-hidden="true"></div>
-  <div class="blob blob--3" aria-hidden="true"></div>
 
   <main class="page-wrapper">
     <div class="container container--narrow">
@@ -48,44 +43,44 @@
           <div class="form-group">
             <label for="input-class" class="form-label">Kelas</label>
             <select id="input-class" class="form-input" required>
-              <option value="">Pilih kelas</option>
-              <option value="1201">12-01</option>
-              <option value="1202">12-02</option>
-              <option value="1203">12-03</option>
-              <option value="1204">12-04</option>
-              <option value="1205">12-05</option>
-              <option value="1206">12-06</option>
-              <option value="1207">12-07</option>
-              <option value="1208">12-08</option>
-              <option value="1209">12-09</option>
-              <option value="1210">12-10</option>
+              <option value="" disabled selected>Pilih kelas...</option>
+              <option value="10A">10A</option>
+              <option value="10B">10B</option>
+              <option value="10C">10C</option>
+              <option value="10D">10D</option>
+              <option value="10E">10E</option>
+              <option value="10F">10F</option>
+              <option value="10G">10G</option>
+              <option value="10H">10H</option>
             </select>
           </div>
 
           <div class="form-group">
             <label for="input-name" class="form-label">Nama</label>
             <select id="input-name" class="form-input" required disabled>
-              <option value="">Pilih kelas dulu</option>
+              <option value="" disabled selected>Pilih nama...</option>
             </select>
-            <span class="form-hint">Nama akan muncul setelah memilih kelas.</span>
           </div>
 
-
-          <div id="absent-error" class="form-error" role="alert" aria-live="polite"></div>
-
-          <button type="submit" id="btn-submit-absent" class="btn btn--primary btn--full btn--lg mt-4">
-            <i data-lucide="send"></i> Simpan Absensi
+          <button type="submit" id="btn-submit" class="btn btn--primary btn--full btn--lg mt-4">
+            <i data-lucide="check-circle"></i>
+            <span>Absen Sekarang</span>
           </button>
         </form>
       </section>
 
-      <section id="success-section" class="card hidden" aria-live="polite">
-        <div class="scan-result scan-result--success">
-          <div class="scan-result__icon" aria-hidden="true"><i data-lucide="check-circle-2"></i></div>
-          <div class="scan-result__title">Absensi Tersimpan</div>
-          <div class="scan-result__detail" id="success-detail"></div>
-          <button type="button" id="btn-add-another" class="btn btn--outline btn--sm mt-4">
-            <i data-lucide="plus"></i> Tambah Lagi
+      <section id="qr-section" class="card hidden">
+        <div class="qr-container">
+          <div class="qr-frame">
+            <canvas id="qr-canvas"></canvas>
+          </div>
+          <div class="qr-info">
+            <p class="qr-info__name" id="qr-name"></p>
+            <p class="qr-info__class" id="qr-class"></p>
+          </div>
+          <button id="btn-back" class="btn btn--outline btn--sm">
+            <i data-lucide="arrow-left"></i>
+            <span>Kembali</span>
           </button>
         </div>
       </section>
@@ -93,10 +88,26 @@
     </div>
   </main>
 
-  <script src="js/env.js"></script>
+  <nav class="nav">
+    <div class="nav__inner">
+      <a href="/" class="nav__brand">
+        <i data-lucide="qr-code"></i>
+        QR Absensi
+      </a>
+      <ul class="nav__links">
+        <li><a href="/" class="nav__link nav__link--active">Home</a></li>
+        <li><a href="/scan.html" class="nav__link">Scan</a></li>
+        <li><a href="/admin.html" class="nav__link">Admin</a></li>
+      </ul>
+    </div>
+  </nav>
+
   <script src="js/supabase-config.js"></script>
   <script src="js/student.js"></script>
   <script src="js/theme-effects.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
 </body>
 
 </html>
