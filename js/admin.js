@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Fetch semua siswa
       const { data, error } = await db
-        .from('siswa')
+        .from('QR')
         .select('*')
         .order('id', { ascending: true });
 
@@ -271,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
       for (let i = 0; i < rows.length; i += BATCH) {
         const batch = rows.slice(i, i + BATCH);
         const { data, error } = await db
-          .from('siswa')
+          .from('QR')
           .upsert(batch, {
             onConflict: 'id',
             ignoreDuplicates: true,   // skip jika id sudah ada
