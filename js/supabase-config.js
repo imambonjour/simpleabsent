@@ -76,8 +76,12 @@ function showToast(message, type = 'info', duration = 4000) {
 // CSV PARSER
 // ========================
 function parseCSV(text) {
+  console.log('[parseCSV] Total bytes:', text.length);
+  
   // Normalize line endings
   const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n');
+  console.log('[parseCSV] Total lines detected:', lines.length);
+  
   if (lines.length < 2) {
     return { headers: [], rows: [], errors: ['File CSV kosong atau hanya ada header'] };
   }
@@ -115,6 +119,11 @@ function parseCSV(text) {
     }
 
     rows.push({ id, nama });
+  }
+
+  console.log('[parseCSV] Parsing complete - Rows:', rows.length, 'Errors:', errors.length);
+  if (errors.length > 0) {
+    console.warn('[parseCSV] Errors:', errors);
   }
 
   return { headers, rows, errors };
