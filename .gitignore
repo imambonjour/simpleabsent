@@ -1,3 +1,1 @@
-.env
-js/env.js
-
+Nothing needs to be added to the .gitignore file based on the provided changes. The listed files (SETUP_QR.md, setup_qr_table.sql, js/admin.js, js/scanner.js) are all source/config files that should be tracked in version control.

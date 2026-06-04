@@ -378,8 +378,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const [{ count: total, error: totalError }, { count: claimed, error: claimedError }] = await Promise.all([
-        db.from('siswa').select('id', { count: 'exact', head: true }),
-        db.from('siswa').select('id', { count: 'exact', head: true }).eq('claimed', true),
+        db.from('QR').select('id', { count: 'exact', head: true }),
+        db.from('QR').select('id', { count: 'exact', head: true }).eq('claimed', true),
       ]);
 
       if (totalError || claimedError) throw totalError || claimedError;
