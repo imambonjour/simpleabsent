@@ -1,7 +1,7 @@
 /* ===================================================
    Sistem QR Konsumsi — Design System
    Theme: Boxy Pixel Art / Retro 8-bit Style
-   Font: System Sans-Serif (with pixel fallback)
+   Font: Pixelify Sans (Google Fonts)
    =================================================== */
 
 /* ---------- CSS Custom Properties ---------- */
@@ -89,6 +89,7 @@ html {
 }
 
 body {
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
   font-family: 'Pixelify Sans', Courier, monospace, system-ui, sans-serif;
   font-size: var(--text-base);
   font-weight: 400;
@@ -96,7 +97,7 @@ body {
   color: var(--text-main);
   background-color: var(--bg-primary);
   min-height: 100vh;
-  -webkit-font-smoothing: none;
+  -webkit-font-smoothing: antialiased;
   position: relative;
   overflow-x: hidden;
   image-rendering: pixelated;
@@ -120,6 +121,7 @@ body::before {
 
 /* ---------- Typography ---------- */
 h1, h2, h3, h4, h5, h6 {
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
   font-family: 'Pixelify Sans', Courier, monospace;
   font-weight: 700;
   line-height: 1.25;
@@ -330,6 +332,7 @@ p { color: var(--text-muted); }
 }
 
 .form-label {
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
   font-family: 'Pixelify Sans', Courier, monospace;
   font-size: var(--text-sm);
   font-weight: 700;
@@ -341,7 +344,7 @@ p { color: var(--text-muted); }
 .form-input {
   width: 100%;
   padding: 12px 18px;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
   font-size: var(--text-base);
   color: var(--text-main);
   background-color: var(--bg-input);
@@ -451,7 +454,7 @@ select.form-input {
   font-weight: 700;
   line-height: 1;
   margin-bottom: var(--space-1);
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
 }
 
 .stat-card__label {
@@ -495,13 +498,130 @@ select.form-input {
   font-size: var(--text-sm);
   color: var(--text-main);
   box-shadow: var(--shadow-hard);
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
 }
 
 .toast--success { border-left: var(--border-thick) solid var(--success-icon); }
 .toast--error   { border-left: var(--border-thick) solid var(--error-icon); }
 .toast--warning { border-left: var(--border-thick) solid var(--warning-icon); }
 .toast--info    { border-left: var(--border-thick) solid var(--info-icon); }
+
+/* ---------- QR Code Display ---------- */
+.qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.qr-frame {
+  background: white;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: var(--border-thick) solid var(--border-color);
+  box-shadow: var(--shadow-hard);
+}
+
+.qr-frame canvas,
+.qr-frame img {
+  display: block;
+  width: 200px;
+  height: 200px;
+  image-rendering: pixelated;
+}
+
+.qr-info {
+  text-align: center;
+}
+
+.qr-info__name {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: var(--space-1);
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
+}
+
+.qr-info__class {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* ---------- Scan Result Overlay ---------- */
+.scan-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6);
+  text-align: center;
+  border-radius: var(--radius-md);
+  border: var(--border-thick) solid var(--border-color);
+}
+
+.scan-result--success {
+  background-color: var(--success-bg);
+  color: var(--success-icon);
+  border-color: var(--success-icon);
+}
+
+.scan-result--duplicate {
+  background-color: var(--warning-bg);
+  color: var(--warning-icon);
+  border-color: var(--warning-icon);
+}
+
+.scan-result--invalid {
+  background-color: var(--error-bg);
+  color: var(--error-icon);
+  border-color: var(--error-icon);
+}
+
+.scan-result__icon {
+  font-size: 32px;
+}
+
+.scan-result__title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
+  text-transform: uppercase;
+}
+
+.scanner-status {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: var(--border-thick) solid var(--border-color);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
+}
+
+.scanner-status--info {
+  background-color: var(--info-bg);
+  color: var(--info-icon);
+  border-color: var(--info-icon);
+}
+
+.scanner-status--warning {
+  background-color: var(--warning-bg);
+  color: var(--warning-icon);
+  border-color: var(--warning-icon);
+}
+
+.scanner-status--error {
+  background-color: var(--error-bg);
+  color: var(--error-icon);
+  border-color: var(--error-icon);
+}
+
+.scanner-status--success {
+  background-color: var(--success-bg);
+  color: var(--success-icon);
+  border-color: var(--success-icon);
+}
 
 /* ---------- Header / Logo ---------- */
 .header {
@@ -514,7 +634,7 @@ select.form-input {
 
 .hero__badge {
   display: inline-block;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
   font-size: var(--text-xs);
   font-weight: 700;
   color: var(--text-main);
@@ -541,14 +661,14 @@ select.form-input {
   font-weight: 900;
   line-height: 1;
   color: var(--primary-blue);
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
   text-shadow: 4px 4px 0px var(--border-color);
   margin-bottom: var(--space-1);
   letter-spacing: -0.05em;
 }
 
 .hero__cohort {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
   font-size: 32px;
   font-weight: 700;
   color: var(--primary-orange);
@@ -587,7 +707,7 @@ select.form-input {
 }
 
 .nav__brand {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
   font-weight: 700;
   font-size: var(--text-lg);
   color: var(--text-main);
@@ -611,7 +731,7 @@ select.form-input {
   font-size: var(--text-sm);
   padding: 8px 14px;
   border-radius: var(--radius-sm);
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
   transition: all var(--duration-fast) ease;
   border: var(--border-thin) solid transparent;
   text-transform: uppercase;
@@ -628,6 +748,50 @@ select.form-input {
   background-color: var(--primary-green);
   color: var(--text-light);
   border-color: var(--border-color);
+}
+
+/* ---------- File Upload Area ---------- */
+.upload-area {
+  border: var(--border-thick) dashed var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  background-color: var(--bg-card);
+  transition: all var(--duration-base) ease;
+}
+
+.upload-area:hover,
+.upload-area--dragover {
+  background-color: var(--bg-input);
+  border-color: var(--primary-blue);
+}
+
+.upload-area__icon {
+  font-size: 36px;
+  color: var(--primary-blue);
+  margin-bottom: var(--space-2);
+}
+
+.upload-area__text {
+  font-size: var(--text-base);
+  color: var(--text-main);
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.upload-area__hint {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.upload-area input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
 }
 
 /* ---------- Setup Notice ---------- */
@@ -652,7 +816,7 @@ select.form-input {
   margin-bottom: var(--space-1);
   color: var(--info-icon);
   font-size: var(--text-lg);
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
   text-transform: uppercase;
 }
 
@@ -667,7 +831,7 @@ select.form-input {
   background-color: var(--bg-input);
   color: var(--text-main);
   font-size: var(--text-xs);
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Pixelify Sans', system-ui, sans-serif;
   border: var(--border-thin) solid var(--border-color);
 }
 
