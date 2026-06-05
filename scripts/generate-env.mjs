@@ -24,6 +24,9 @@ function parseEnv(text) {
 }
 
 const fileEnv = existsSync('.env') ? parseEnv(readFileSync('.env', 'utf8')) : {};
+
+// Di Vercel, process.env memiliki prioritas karena env vars diset di dashboard/platform
+// Gabungkan dengan prioritas: process.env > file .env
 const env = { ...fileEnv, ...process.env };
 
 const config = {
@@ -31,6 +34,12 @@ const config = {
   SUPABASE_ANON_KEY: env.SUPABASE_ANON_KEY || env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   ADMIN_PASSWORD: env.ADMIN_PASSWORD,
 };
+
+// Debug logging untuk membantu troubleshooting di Vercel
+console.log('Environment variables detected:');
+console.log('- SUPABASE_URL:', config.SUPABASE_URL ? '✓ Set' : '✗ Missing');
+console.log('- SUPABASE_ANON_KEY:', config.SUPABASE_ANON_KEY ? '✓ Set' : '✗ Missing');
+console.log('- ADMIN_PASSWORD:', config.ADMIN_PASSWORD ? '✓ Set' : '✗ Missing');
 
 const missing = [
   !config.SUPABASE_URL && 'SUPABASE_URL / NEXT_PUBLIC_SUPABASE_URL',
