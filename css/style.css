@@ -973,3 +973,42 @@ select.form-input {
 .toast--error .lucide   { color: var(--error-icon); }
 .toast--warning .lucide { color: var(--warning-icon); }
 .toast--info .lucide    { color: var(--info-icon); }
+
+/* QR Code Container Styles */
+.qrcode-container {
+  background: var(--bg-input);
+  border: var(--border-thick) solid var(--border-color);
+  padding: var(--space-4);
+  display: inline-block;
+  box-shadow: var(--shadow-hard);
+}
+
+.qrcode-container img {
+  display: block;
+  margin: 0 auto;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mb-2 {
+  margin-bottom: var(--space-2);
+}
+
+.mt-4 {
+  margin-top: var(--space-4);
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}

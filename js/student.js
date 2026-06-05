@@ -21,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const successSection = document.getElementById('success-section');
   const successDetail  = document.getElementById('success-detail');
   const btnAddAnother  = document.getElementById('btn-add-another');
+  const qrSection      = document.getElementById('qr-section');
+  const qrcodeContainer = document.getElementById('qrcode');
 
   /** @type {Map<string, Array<{id: number, name: string, class: number, stats: boolean}>>} */
   const rosterByClass = new Map();
@@ -67,17 +69,47 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!db) throw new Error('Supabase belum dikonfigurasi.');
 
       // Update stats from false → true
-      const { error } = await db
+      const { error: updateError } = await db
         .from('absen')
         .update({ stats: true })
         .eq('id', student.id);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
+
+      // Insert or update QR table with new token
+      // First, check if student already exists in QR table
+      const { data: qrData, error: qrCheckError } = await db
+        .from('QR')
+        .select('qr_token')
+        .eq('id', student.id)
+        .single();
+
+      let qrToken;
+      
+      if (qrCheckError || !qrData) {
+        // Student not in QR table yet, insert new record
+        const { data: insertData, error: insertError } = await db
+          .from('QR')
+          .insert([
+            { 
+              id: student.id, 
+              nama: student.name 
+            }
+          ])
+          .select('qr_token')
+          .single();
+
+        if (insertError) throw insertError;
+        qrToken = insertData.qr_token;
+      } else {
+        // Student already in QR table, use existing token
+        qrToken = qrData.qr_token;
+      }
 
       // Update local cache
       student.stats = true;
 
-      showSuccess(student);
+      showSuccess(student, qrToken);
       showToast('Absensi tersimpan', 'success');
       absentForm.reset();
       resetNameSelector();
@@ -93,6 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnAddAnother.addEventListener('click', () => {
     successSection.classList.add('hidden');
+    qrSection.classList.add('hidden');
+    qrcodeContainer.innerHTML = ''; // Clear QR code when starting over
     inputClass.focus();
   });
 
@@ -181,8 +215,25 @@ document.addEventListener('DOMContentLoaded', () => {
     setupNotice.classList.toggle('hidden', isConfigured);
   }
 
-  function showSuccess(record) {
+  function showSuccess(record, qrToken = null) {
     successDetail.textContent = `${record.name} — Kelas ${record.class}`;
+    
+    // Show QR code section if token is provided
+    if (qrToken && typeof QRCode !== 'undefined') {
+      qrcodeContainer.innerHTML = ''; // Clear previous QR code
+      new QRCode(qrcodeContainer, {
+        text: qrToken,
+        width: 200,
+        height: 200,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+      qrSection.classList.remove('hidden');
+    } else {
+      qrSection.classList.add('hidden');
+    }
+    
     successSection.classList.remove('hidden');
   }
 

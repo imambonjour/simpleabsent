@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body>
@@ -84,6 +85,14 @@
           <div class="scan-result__icon" aria-hidden="true"><i data-lucide="check-circle-2"></i></div>
           <div class="scan-result__title">Absensi Tersimpan</div>
           <div class="scan-result__detail" id="success-detail"></div>
+          
+          <!-- QR Code Section -->
+          <div id="qr-section" class="mt-4 hidden">
+            <p class="text-center mb-2">QR Token Konsumsi Anda:</p>
+            <div id="qrcode" class="qrcode-container mx-auto"></div>
+            <p class="text-center text-sm mt-2 text-muted">Tunjukkan QR ini ke petugas untuk mengambil konsumsi</p>
+          </div>
+          
           <button type="button" id="btn-add-another" class="btn btn--outline btn--sm mt-4">
             <i data-lucide="plus"></i> Tambah Lagi
           </button>

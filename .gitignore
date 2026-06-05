@@ -1,3 +1,4 @@
+Nothing should be ignored based on the provided file changes, as they only include source files (.md, .css, .html, .js) without any build artifacts, dependencies, or temporary files.
 ```
 # Environment variables
 .env*
