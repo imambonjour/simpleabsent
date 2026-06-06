@@ -13,6 +13,8 @@
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- QR Code Generator -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 
 <body>
@@ -86,6 +88,25 @@
           <div class="scan-result__detail" id="success-detail"></div>
           <button type="button" id="btn-add-another" class="btn btn--outline btn--sm mt-4">
             <i data-lucide="plus"></i> Tambah Lagi
+          </button>
+        </div>
+      </section>
+
+      <!-- QR Code Result Section (hidden by default) -->
+      <section id="qr-section" class="card hidden">
+        <div class="qr-container">
+          <div class="qr-frame" id="qr-frame">
+            <div id="qr-code"></div>
+          </div>
+          <div class="qr-info">
+            <div class="qr-info__name" id="qr-name"></div>
+            <div class="qr-info__class" id="qr-class"></div>
+          </div>
+          <p class="text-center" style="font-size: var(--text-sm); color: var(--warm-600); max-width: 300px; margin-top: 10px; line-height: 1.4;">
+            Tunjukkan QR ini ke panitia di pintu untuk mendapatkan konsumsi kamu.
+          </p>
+          <button type="button" id="btn-back" class="btn btn--outline btn--sm mt-4">
+            <i data-lucide="arrow-left"></i> Kembali
           </button>
         </div>
       </section>
