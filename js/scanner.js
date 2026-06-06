@@ -313,23 +313,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========================
   // Manual Input
   // ========================
-  btnManualCheck.addEventListener('click', () => {
-    const token = manualToken.value.trim();
-    if (!token) {
-      showToast('Masukkan token QR atau ID Siswa', 'warning');
-      manualToken.focus();
-      return;
-    }
-    processToken(token);
-    manualToken.value = '';
-  });
+  if (btnManualCheck && manualToken) {
+    btnManualCheck.addEventListener('click', () => {
+      const token = manualToken.value.trim();
+      if (!token) {
+        showToast('Masukkan token QR atau ID Siswa', 'warning');
+        manualToken.focus();
+        return;
+      }
+      processToken(token);
+      manualToken.value = '';
+    });
 
-  manualToken.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      btnManualCheck.click();
-    }
-  });
+    manualToken.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        btnManualCheck.click();
+      }
+    });
+  }
 
   // ========================
   // Process Token / Student ID
@@ -429,6 +431,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderHistory() {
+    if (!scanHistory) return;
     if (scanHistoryLog.length === 0) {
       scanHistory.innerHTML = `
         <div class="empty-state" style="padding: var(--space-4);">
@@ -460,16 +463,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  btnClearHistory.addEventListener('click', () => {
-    scanHistoryLog = [];
-    renderHistory();
-    showToast('Riwayat dibersihkan', 'info');
-  });
+  if (btnClearHistory) {
+    btnClearHistory.addEventListener('click', () => {
+      scanHistoryLog = [];
+      renderHistory();
+      showToast('Riwayat dibersihkan', 'info');
+    });
+  }
 
   // ========================
   // Stats
   // ========================
   async function refreshStats() {
+    if (!scanCount || !scanTotal || !scanPercent) return;
     const db = getDB();
     if (!db) {
       scanCount.textContent = '0';
