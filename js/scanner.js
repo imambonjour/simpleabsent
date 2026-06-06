@@ -46,6 +46,49 @@ document.addEventListener('DOMContentLoaded', () => {
   btnStartScan.addEventListener('click', startScanner);
   btnStopScan.addEventListener('click', stopScanner);
 
+  let synth = null;
+
+  function playRetroSound(isSuccess) {
+    try {
+      if (!synth) {
+        synth = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      
+      const osc = synth.createOscillator();
+      const gain = synth.createGain();
+      osc.connect(gain);
+      gain.connect(synth.destination);
+      
+      osc.type = 'square'; // retro 8-bit
+
+      if (isSuccess) {
+        const now = synth.currentTime;
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        gain.gain.setValueAtTime(0.15, now);
+        
+        osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+        gain.gain.setValueAtTime(0.15, now + 0.08);
+        
+        osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+        gain.gain.setValueAtTime(0.15, now + 0.16);
+
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else {
+        const now = synth.currentTime;
+        osc.frequency.setValueAtTime(150, now); // Low buzz
+        gain.gain.setValueAtTime(0.2, now);
+        
+        osc.frequency.setValueAtTime(110, now + 0.15); // Drop frequency
+        
+        osc.start(now);
+        osc.stop(now + 0.4);
+      }
+    } catch (e) {
+      console.log("Audio Context not supported or failed", e);
+    }
+  }
+
   async function startScanner() {
     if (isScanning || isStartingScanner) return;
 
@@ -82,6 +125,14 @@ document.addEventListener('DOMContentLoaded', () => {
       isScanning = true;
       btnStartScan.classList.add('hidden');
       btnStopScan.classList.remove('hidden');
+      
+      const cameraOverlay = document.getElementById('camera-overlay');
+      const laser = document.getElementById('laser');
+      const yellowDot = document.getElementById('status-yellow-dot');
+      if (cameraOverlay) cameraOverlay.style.display = 'none';
+      if (laser) laser.style.display = 'block';
+      if (yellowDot) yellowDot.classList.add('animate-pulse');
+
       setScannerStatus('Scanner aktif. Arahkan kamera ke QR siswa.', 'success');
       showToast('Scanner aktif', 'info');
 
@@ -104,6 +155,14 @@ document.addEventListener('DOMContentLoaded', () => {
       isScanning = false;
       btnStopScan.classList.add('hidden');
       btnStartScan.classList.remove('hidden');
+      
+      const cameraOverlay = document.getElementById('camera-overlay');
+      const laser = document.getElementById('laser');
+      const yellowDot = document.getElementById('status-yellow-dot');
+      if (cameraOverlay) cameraOverlay.style.display = 'flex';
+      if (laser) laser.style.display = 'none';
+      if (yellowDot) yellowDot.classList.remove('animate-pulse');
+
       setScannerStatus('Scanner dihentikan.', 'info');
       showToast('Scanner dihentikan', 'info');
     }
@@ -190,7 +249,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function setScannerStatus(message, type = 'info') {
     scannerStatus.textContent = message;
-    scannerStatus.className = `scanner-status scanner-status--${type} mb-4`;
+    
+    const statusBox = document.getElementById('scanner-status-box');
+    const statusDot = document.getElementById('status-pixel-dot');
+    const notifTitle = document.getElementById('notif-title');
+    const statusIcon = document.getElementById('status-icon');
+
+    if (!statusBox || !statusDot || !notifTitle || !statusIcon) return;
+
+    if (type === 'success') {
+      statusBox.style.backgroundColor = '#ecfdf5';
+      statusBox.style.borderColor = '#10b981';
+      statusDot.style.backgroundColor = '#10b981';
+      notifTitle.innerText = "BERHASIL!";
+      notifTitle.style.color = '#047857';
+      statusIcon.innerText = "❇️";
+    } else if (type === 'warning') {
+      statusBox.style.backgroundColor = '#fffbeb';
+      statusBox.style.borderColor = '#f59e0b';
+      statusDot.style.backgroundColor = '#f59e0b';
+      notifTitle.innerText = "SUDAH DIAMBIL!";
+      notifTitle.style.color = '#b45309';
+      statusIcon.innerText = "⚠️";
+    } else if (type === 'error') {
+      statusBox.style.backgroundColor = '#fff1f2';
+      statusBox.style.borderColor = '#f43f5e';
+      statusDot.style.backgroundColor = '#f43f5e';
+      notifTitle.innerText = "GAGAL!";
+      notifTitle.style.color = '#be123c';
+      statusIcon.innerText = "❌";
+    } else {
+      // info / default
+      statusBox.style.backgroundColor = '#eff6ff';
+      statusBox.style.borderColor = '#3b82f6';
+      statusDot.style.backgroundColor = '#3b82f6';
+      notifTitle.innerText = "STATUS PEMINDAI";
+      notifTitle.style.color = '#1d4ed8';
+      statusIcon.innerText = "🤖";
+    }
   }
 
   function onScanSuccess(decodedText) {
@@ -275,18 +371,24 @@ document.addEventListener('DOMContentLoaded', () => {
       title = 'Berhasil!';
       detail = `${result.nama}`;
       showToast(`${result.nama} berhasil diverifikasi`, 'success');
+      playRetroSound(true);
+      setScannerStatus(`${result.nama} berhasil diverifikasi`, 'success');
     } else if (result.message.includes('sudah')) {
-      type = 'duplicate';
+      type = 'duplicate'; // map duplicate to styling class
       icon = '<i data-lucide="alert-triangle"></i>';
       title = 'Sudah Diambil!';
       detail = result.nama ? `${result.nama}` : result.message;
       showToast('Konsumsi sudah diambil sebelumnya', 'warning');
+      playRetroSound(false);
+      setScannerStatus(result.nama ? `${result.nama}: ${result.message}` : result.message, 'warning');
     } else {
-      type = 'invalid';
+      type = 'invalid'; // map invalid to styling class
       icon = '<i data-lucide="x-circle"></i>';
       title = 'Tidak Valid';
       detail = result.message;
       showToast('QR Code tidak valid', 'error');
+      playRetroSound(false);
+      setScannerStatus(result.message, 'error');
     }
 
     scanResultContainer.innerHTML = `

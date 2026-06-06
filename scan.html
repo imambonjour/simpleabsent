@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,29 +14,139 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- QR Scanner Library -->
   <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <!-- Google Fonts for retro design -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+
   <style>
-    /* Scanner-specific styles */
-    #scanner-reader {
+    /* Menggunakan font pixel untuk elemen retro */
+    .font-pixel-title {
+      font-family: 'Press Start 2P', cursive;
+      image-rendering: pixelated;
+    }
+
+    .font-pixel-body {
+      font-family: 'VT323', monospace;
+      font-size: 1.35rem;
+      letter-spacing: 0.5px;
+    }
+
+    body {
+      margin: 0 !important;
+      padding: 0 !important;
+      min-height: 100vh;
+    }
+
+    /* Efek Pixel Border dan Bayangan Tebal ala Game Retro */
+    .pixel-card {
+      background-color: var(--bg-card);
+      border: none !important;
+      box-shadow: none !important;
       width: 100%;
-      max-width: 400px;
-      margin: 0 auto;
+      min-height: 100vh;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
+      padding: 24px !important;
     }
-    #scanner-reader video {
-      border-radius: var(--radius-lg) !important;
+
+    .pixel-btn {
+      background-color: var(--primary-orange);
+      border: 4px solid var(--border-color);
+      box-shadow: 4px 4px 0px var(--border-color);
+      transition: all 0.1s ease;
+      cursor: pointer;
     }
-    #scanner-reader__scan_region {
-      border-radius: var(--radius-lg);
+
+    .pixel-btn:active {
+      transform: translate(4px, 4px);
+      box-shadow: 0px 0px 0px var(--border-color);
+    }
+
+    .pixel-btn-secondary {
+      background-color: #ffffff;
+      border: 4px solid var(--border-color);
+      box-shadow: 4px 4px 0px var(--border-color);
+      transition: all 0.1s ease;
+      cursor: pointer;
+    }
+
+    .pixel-btn-secondary:active {
+      transform: translate(4px, 4px);
+      box-shadow: 0px 0px 0px var(--border-color);
+    }
+
+    /* Pemindai QR - Bingkai Kamera */
+    .scanner-window {
+      border: 4px dashed var(--border-color);
+      position: relative;
       overflow: hidden;
+      background-color: #1a1613;
     }
-    /* Hide html5-qrcode default UI elements */
-    #scanner-reader__dashboard_section {
-      display: none !important;
+
+    /* Animasi Laser Pemindaian Pixel */
+    .laser-line {
+      position: absolute;
+      width: 100%;
+      height: 6px;
+      background-color: #55ff55;
+      box-shadow: 0 0 8px #55ff55;
+      animation: scan 2s linear infinite;
+      z-index: 10;
     }
-    #scanner-reader__header_message {
-      display: none !important;
+
+    @keyframes scan {
+      0% {
+        top: 0%;
+      }
+
+      50% {
+        top: 100%;
+      }
+
+      100% {
+        top: 0%;
+      }
     }
-    #scanner-reader img[alt="Info icon"] {
-      display: none !important;
+
+    /* Sudut-sudut Dekoratif Pixel */
+    .pixel-corner {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-style: solid;
+      z-index: 20;
+    }
+
+    .pixel-corner.top-left {
+      top: 8px;
+      left: 8px;
+      border-width: 4px 0 0 4px;
+      border-color: var(--primary-orange);
+    }
+
+    .pixel-corner.top-right {
+      top: 8px;
+      right: 8px;
+      border-width: 4px 4px 0 0;
+      border-color: var(--primary-orange);
+    }
+
+    .pixel-corner.bottom-left {
+      bottom: 8px;
+      left: 8px;
+      border-width: 0 0 4px 4px;
+      border-color: var(--primary-orange);
+    }
+
+    .pixel-corner.bottom-right {
+      bottom: 8px;
+      right: 8px;
+      border-width: 0 4px 4px 0;
+      border-color: var(--primary-orange);
     }
 
     .scan-history-item {
@@ -43,7 +154,7 @@
       align-items: center;
       gap: var(--space-3);
       padding: var(--space-2) var(--space-3);
-      border-bottom: 0.5px solid var(--border-color);
+      border-bottom: 2px solid var(--border-color);
       font-size: var(--text-sm);
     }
 
@@ -65,12 +176,30 @@
     .manual-input-group .form-input {
       flex: 1;
     }
+
+    /* Animation pulse */
+    .animate-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: .5;
+      }
+    }
   </style>
 </head>
+
 <body>
 
   <!-- Navigation -->
-  <nav class="nav" role="navigation" aria-label="Main navigation">
+  <!-- <nav class="nav" role="navigation" aria-label="Main navigation">
     <div class="nav__inner">
       <a href="index.html" class="nav__brand" id="nav-brand"><i data-lucide="graduation-cap"></i> QR Konsumsi</a>
       <ul class="nav__links">
@@ -82,17 +211,17 @@
   </nav>
 
   <main class="page-wrapper" style="padding-top: 80px;">
-    <div class="container" style="max-width: 500px;">
+    <div class="container" style="max-width: 500px;"> -->
 
-      <!-- Header -->
-      <header class="header">
+  <!-- Header -->
+  <!-- <header class="header">
         <div class="header__icon" aria-hidden="true"><i data-lucide="camera"></i></div>
         <h1 class="header__title">Scanner QR</h1>
         <p class="header__subtitle">Arahkan kamera ke QR code siswa</p>
-      </header>
+      </header> -->
 
-      <!-- Stats Bar -->
-      <div class="stats-grid mb-6" style="grid-template-columns: repeat(3, 1fr);">
+  <!-- Stats Bar -->
+  <!-- <div class="stats-grid mb-6" style="grid-template-columns: repeat(3, 1fr);">
         <div class="stat-card">
           <div class="stat-card__value" style="color: var(--success-icon);" id="scan-count">0</div>
           <div class="stat-card__label">Discan</div>
@@ -105,34 +234,94 @@
           <div class="stat-card__value text-accent" id="scan-percent">0%</div>
           <div class="stat-card__label">Progress</div>
         </div>
+      </div> -->
+
+  <!-- Scanner -->
+  <div class="pixel-card">
+
+    <!-- Label Antarmuka -->
+    <div
+      style="display: flex; justify-content: space-between; align-items: center; border-bottom: 4px dashed var(--border-color); padding-bottom: 12px; margin-bottom: 4px;">
+      <span class="font-pixel-title text-gray-600"
+        style="font-size: 10px; text-transform: uppercase; tracking-wider: 0.05em;">STASIUN PEMINDAI</span>
+      <div style="display: flex; gap: 6px;">
+        <span
+          style="width: 14px; height: 14px; background-color: #ef4444; border: 2px solid var(--border-color); display: inline-block;"></span>
+        <span id="status-yellow-dot"
+          style="width: 14px; height: 14px; background-color: #facc15; border: 2px solid var(--border-color); display: inline-block;"></span>
+        <span
+          style="width: 14px; height: 14px; background-color: #22c55e; border: 2px solid var(--border-color); display: inline-block;"></span>
       </div>
+    </div>
 
-      <!-- Scanner -->
-      <div class="card mb-6">
-        <div id="scanner-status" class="scanner-status scanner-status--info mb-4">
-          Tekan Mulai Scan untuk mengaktifkan kamera.
-        </div>
+    <!-- Kotak Kamera / Scanner Viewport -->
+    <div class="scanner-window w-full aspect-square rounded-none flex flex-col items-center justify-center relative"
+      style="width: 100%; aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; background-color: #1a1613;">
 
-        <div class="scanner-viewport" id="scanner-viewport">
-          <div id="scanner-reader"></div>
-        </div>
+      <!-- Laser Scan Effect -->
+      <div id="laser" class="laser-line" style="display: none;"></div>
 
-        <!-- Scanner controls -->
-        <div class="flex justify-center gap-3 mt-4">
-          <button type="button" id="btn-start-scan" class="btn btn--primary btn--sm">
-            <i data-lucide="camera"></i> Mulai Scan
-          </button>
-          <button type="button" id="btn-stop-scan" class="btn btn--outline btn--sm hidden">
-            <i data-lucide="square"></i> Stop
-          </button>
+      <!-- Pixel Corner Accents -->
+      <div class="pixel-corner top-left"></div>
+      <div class="pixel-corner top-right"></div>
+      <div class="pixel-corner bottom-left"></div>
+      <div class="pixel-corner bottom-right"></div>
+
+      <!-- Kamera Aktif Container -->
+      <div id="scanner-reader" style="width: 100%; height: 100%;"></div>
+
+      <!-- Overlay Pesan jika Kamera belum aktif -->
+      <div id="camera-overlay"
+        style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; text-align: center; background-color: #1a1613; z-index: 30;">
+        <i data-lucide="camera" style="width: 48px; height: 48px; color: #6b7280; margin-bottom: 12px;"></i>
+        <p class="font-pixel-body" style="font-size: 20px; color: #facc15; margin: 0 0 4px 0;">KAMERA BELUM AKTIF</p>
+        <p class="font-pixel-body"
+          style="font-size: 14px; color: #9ca3af; max-width: 280px; margin: 0; line-height: 1.2;">Tekan tombol "MULAI
+          SCAN" di bawah untuk mengizinkan penggunaan kamera.</p>
+      </div>
+    </div>
+
+    <!-- Tombol Kontrol Kamera -->
+    <div style="display: flex; gap: 12px;">
+      <button type="button" id="btn-start-scan"
+        class="pixel-btn font-pixel-body py-2 px-4 text-lg font-bold text-[#2b2b2b] flex items-center justify-center gap-2"
+        style="flex: 1; min-height: auto;">
+        <span>▶ MULAI SCAN</span>
+      </button>
+      <button type="button" id="btn-stop-scan"
+        class="pixel-btn-secondary font-pixel-body py-2 px-4 text-lg font-bold text-[#2b2b2b] flex items-center justify-center gap-2 hidden"
+        style="flex: 1; min-height: auto;">
+        <span>■ STOP SCAN</span>
+      </button>
+    </div>
+
+    <!-- Kolom Notifikasi Kecil untuk Feedback Sukses/Tidak (Pixelated) -->
+    <div id="scanner-status-box"
+      style="border: 4px solid var(--border-color); background-color: white; padding: 12px; display: flex; align-items: center; justify-content: space-between; margin-top: 4px; transition: all 0.3s ease;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <!-- Indikator Status Pixelated -->
+        <div id="status-pixel-dot"
+          style="width: 16px; height: 16px; background-color: #9ca3af; border: 2px solid black; flex-shrink: 0;"></div>
+        <div style="display: flex; flex-direction: column; text-align: left;">
+          <span id="notif-title" class="font-pixel-title"
+            style="font-size: 8px; color: #6b7280; text-transform: uppercase; line-height: 1; margin-bottom: 2px;">STATUS
+            PEMINDAI</span>
+          <span id="scanner-status" class="font-pixel-body"
+            style="font-size: 16px; color: #4b5563; line-height: 1.2; font-family: 'VT323', monospace;">Tekan Mulai Scan
+            untuk mengaktifkan kamera.</span>
         </div>
       </div>
+      <!-- Ikon Feedback -->
+      <span id="status-icon" class="font-pixel-title" style="font-size: 18px;">🤖</span>
+    </div>
 
-      <!-- Scan Result (appears after scan) -->
-      <div id="scan-result-container" class="mb-6 hidden"></div>
+  </div>
 
-      <!-- Manual Input (fallback) -->
-      <div class="card mb-6">
+  <!-- Scan Result (appears after scan) -->
+  <div id="scan-result-container" class="mb-6 hidden"></div>
+
+  <!-- Manual Input (fallback) -->
+  <!-- <div class="card mb-6">
         <h4 class="mb-4" style="display: flex; align-items: center; gap: 6px;"><i data-lucide="keyboard" style="width: 18px; height: 18px;"></i> Input Manual</h4>
         <p style="font-size: var(--text-xs); color: var(--warm-400); margin-bottom: var(--space-2);">
           Gunakan ini jika kamera tidak bisa membaca QR code
@@ -149,10 +338,10 @@
             Cek
           </button>
         </div>
-      </div>
+      </div> -->
 
-      <!-- Scan History -->
-      <div class="card">
+  <!-- Scan History -->
+  <!-- <div class="card">
         <div class="flex justify-between items-center mb-4">
           <h4 style="display: flex; align-items: center; gap: 6px;"><i data-lucide="clipboard-list" style="width: 18px; height: 18px;"></i> Riwayat Scan</h4>
           <button type="button" id="btn-clear-history" class="btn btn--ghost btn--sm">Bersihkan</button>
@@ -166,11 +355,12 @@
       </div>
 
     </div>
-  </main>
+  </main> -->
 
   <!-- Scripts -->
   <script src="js/env.js"></script>
   <script src="js/supabase-config.js"></script>
   <script src="js/scanner.js"></script>
 </body>
+
 </html>
