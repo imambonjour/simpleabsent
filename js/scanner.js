@@ -353,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Process token error:', err);
       showScanResult({
         success: false,
-        message: 'Koneksi gagal. Coba lagi.',
+        message: err.message || 'Koneksi gagal. Coba lagi.',
         nama: ''
       });
     }
