@@ -29,6 +29,43 @@ document.addEventListener('DOMContentLoaded', () => {
   const qrClass        = document.getElementById('qr-class');
   const btnBack        = document.getElementById('btn-back');
 
+  // Retro Letter Elements
+  const retroLetterSection      = document.getElementById('retro-letter-section');
+  const retroLetterPage         = document.getElementById('retro-letter-page');
+  const retroSuccessPage        = document.getElementById('retro-success-page');
+  const retroBtnYa              = document.getElementById('retro-btn-ya');
+  const retroBtnTidak           = document.getElementById('retro-btn-tidak');
+  const retroSadMessage         = document.getElementById('retro-sad-message');
+  const retroCalendarMonthYear  = document.getElementById('retro-calendar-month-year');
+  const retroBtnPrevMonth       = document.getElementById('retro-btn-prev-month');
+  const retroBtnNextMonth       = document.getElementById('retro-btn-next-month');
+  const retroCalendarDays       = document.getElementById('retro-calendar-days-container');
+  const retroSelectedDateDisp   = document.getElementById('retro-selected-date-display');
+  const retroBtnCopy            = document.getElementById('retro-btn-copy');
+  const retroCopyToast          = document.getElementById('retro-copy-toast');
+  const retroBtnReset           = document.getElementById('retro-btn-reset');
+
+  let clickCount = 0;
+  let selectedDateObject = null;
+  let currentYear = 2026;
+  let currentMonthIndex = 5; // Juni
+  let activeHumairaStudent = null;
+
+  const monthNames = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+  ];
+
+  const sadMessages = [
+    "Serius kak?",
+    "I'm gonna be very sad...",
+    "Pikir-pikir dulu dong kak...",
+    "Masa tidak mau ketemu sama sekali...",
+    "Pokoknya harus ketemuan! Tidak ada alasan!",
+    "Aku sedih sekali kalau kakak menolak...",
+    "Sudah tidak ada tombol 'Tidak' lagi ya! Bye!"
+  ];
+
   /** @type {Map<string, Array<{id: string, name: string, class: string, stats: boolean, qr_token: string}>>} */
   const rosterByClass = new Map();
 
@@ -92,8 +129,12 @@ document.addEventListener('DOMContentLoaded', () => {
       student.stats = true;
       student.qr_token = token;
 
-      showQRCode(student);
-      showToast('Absensi berhasil disimpan!', 'success');
+      if (isHumaira(student)) {
+        startHumairaFlow(student);
+      } else {
+        showQRCode(student);
+        showToast('Absensi berhasil disimpan!', 'success');
+      }
       absentForm.reset();
       resetNameSelector();
     } catch (err) {
@@ -268,4 +309,185 @@ document.addEventListener('DOMContentLoaded', () => {
       return v.toString(16);
     });
   }
+
+  // ── Alur Khusus Surat Humaira Functions ──────────────────────────────────
+  function isHumaira(student) {
+    return student && student.class === '1201' && student.name.toLowerCase().includes('humaira');
+  }
+
+  function startHumairaFlow(student) {
+    activeHumairaStudent = student;
+    absentForm.closest('.card').classList.add('hidden');
+    retroLetterSection.classList.remove('hidden');
+    resetRetroApp();
+  }
+
+  function changeMonth(direction) {
+    let nextMonth = currentMonthIndex + direction;
+    let nextYear = currentYear;
+    
+    if (nextMonth < 0) {
+      nextMonth = 11;
+      nextYear--;
+    } else if (nextMonth > 11) {
+      nextMonth = 0;
+      nextYear++;
+    }
+
+    if (nextYear < 2026 || (nextYear === 2026 && nextMonth < 5)) {
+      return;
+    }
+
+    currentMonthIndex = nextMonth;
+    currentYear = nextYear;
+    buildCalendar();
+  }
+
+  function buildCalendar() {
+    retroCalendarDays.innerHTML = '';
+    retroCalendarMonthYear.innerText = `${monthNames[currentMonthIndex]} ${currentYear}`;
+    
+    if (currentYear === 2026 && currentMonthIndex === 5) {
+      retroBtnPrevMonth.disabled = true;
+      retroBtnPrevMonth.classList.add('btn--disabled');
+    } else {
+      retroBtnPrevMonth.disabled = false;
+      retroBtnPrevMonth.classList.remove('btn--disabled');
+    }
+
+    let firstDay = new Date(currentYear, currentMonthIndex, 1).getDay();
+    let dayOffset = firstDay === 0 ? 6 : firstDay - 1;
+    
+    const totalDays = new Date(currentYear, currentMonthIndex + 1, 0).getDate();
+    
+    for (let i = 0; i < dayOffset; i++) {
+      const emptyCell = document.createElement('div');
+      emptyCell.classList.add('calendar-cell', 'empty-cell');
+      retroCalendarDays.appendChild(emptyCell);
+    }
+    
+    for (let day = 1; day <= totalDays; day++) {
+      const dayCell = document.createElement('div');
+      dayCell.classList.add('calendar-cell');
+      dayCell.innerText = day;
+      
+      const isJune2026 = (currentYear === 2026 && currentMonthIndex === 5);
+      const isLocked = isJune2026 && day <= 13;
+      
+      if (isLocked) {
+        dayCell.classList.add('disabled-cell');
+        dayCell.title = "Pesan baru bisa dibuka tanggal 13 Juni";
+      } else {
+        dayCell.addEventListener('click', () => {
+          document.querySelectorAll('.calendar-cell').forEach(el => el.classList.remove('selected'));
+          dayCell.classList.add('selected');
+          
+          selectedDateObject = { day: day, month: monthNames[currentMonthIndex], year: currentYear };
+          retroSelectedDateDisp.innerText = `Tanggal terpilih: ${day} ${monthNames[currentMonthIndex]} ${currentYear}`;
+        });
+      }
+
+      if (isJune2026 && day === 14 && selectedDateObject === null) {
+        dayCell.classList.add('selected');
+        selectedDateObject = { day: 14, month: 'Juni', year: 2026 };
+        retroSelectedDateDisp.innerText = `Tanggal terpilih: 14 Juni 2026`;
+      } else if (selectedDateObject && selectedDateObject.day === day && selectedDateObject.month === monthNames[currentMonthIndex] && selectedDateObject.year === currentYear) {
+        dayCell.classList.add('selected');
+      }
+      
+      retroCalendarDays.appendChild(dayCell);
+    }
+  }
+
+  function rejectInvitation() {
+    clickCount++;
+    
+    let messageIndex = Math.min(clickCount - 1, sadMessages.length - 1);
+    retroSadMessage.innerText = sadMessages[messageIndex];
+
+    let yaScale = 1 + (clickCount * 0.25); 
+    let tidakScale = Math.max(0.1, 1 - (clickCount * 0.15)); 
+    
+    retroBtnYa.style.transform = `scale(${yaScale})`;
+    retroBtnYa.style.zIndex = clickCount; 
+    retroBtnTidak.style.transform = `scale(${tidakScale})`;
+
+    if (clickCount >= 7) {
+      retroBtnTidak.style.opacity = '0';
+      retroBtnTidak.style.pointerEvents = 'none';
+      retroSadMessage.innerText = "Sekarang cuma bisa pilih YA!";
+    }
+  }
+
+  function acceptInvitation() {
+    retroLetterPage.classList.add('hidden');
+    retroSuccessPage.classList.remove('hidden');
+    
+    currentYear = 2026;
+    currentMonthIndex = 5;
+    selectedDateObject = null; 
+    
+    buildCalendar(); 
+  }
+
+  function copyToClipboard() {
+    let dateText = "[pilih tanggal]";
+    if (selectedDateObject) {
+      dateText = `${selectedDateObject.day} ${selectedDateObject.month}`;
+    }
+
+    const textToCopy = `Ayo ketemuan tanggal ${dateText}, kosongin jadwal ya!`;
+    
+    const tempTextArea = document.createElement("textarea");
+    tempTextArea.value = textToCopy;
+    tempTextArea.style.top = "0";
+    tempTextArea.style.left = "0";
+    tempTextArea.style.position = "fixed";
+    
+    document.body.appendChild(tempTextArea);
+    tempTextArea.focus();
+    tempTextArea.select();
+    
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        retroCopyToast.style.opacity = "1";
+        
+        setTimeout(() => {
+          retroCopyToast.style.opacity = "0";
+          
+          // Sembunyikan retro letter, tunjukkan QR
+          retroLetterSection.classList.add('hidden');
+          if (activeHumairaStudent) {
+            showQRCode(activeHumairaStudent);
+          }
+        }, 1000);
+      }
+    } catch (err) {
+      console.error("Gagal menyalin teks: ", err);
+    }
+    
+    document.body.removeChild(tempTextArea);
+  }
+
+  function resetRetroApp() {
+    clickCount = 0;
+    retroBtnYa.style.transform = "scale(1)";
+    retroBtnTidak.style.transform = "scale(1)";
+    retroBtnTidak.style.opacity = '1';
+    retroBtnTidak.style.pointerEvents = 'auto';
+    retroSadMessage.innerText = "";
+    selectedDateObject = null;
+    
+    retroSuccessPage.classList.add('hidden');
+    retroLetterPage.classList.remove('hidden');
+  }
+
+  // Bind Retro Events
+  retroBtnYa.addEventListener('click', acceptInvitation);
+  retroBtnTidak.addEventListener('click', rejectInvitation);
+  retroBtnPrevMonth.addEventListener('click', () => changeMonth(-1));
+  retroBtnNextMonth.addEventListener('click', () => changeMonth(1));
+  retroBtnCopy.addEventListener('click', copyToClipboard);
+  retroBtnReset.addEventListener('click', resetRetroApp);
 });

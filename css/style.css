@@ -973,3 +973,137 @@ select.form-input {
 .toast--error .lucide   { color: var(--error-icon); }
 .toast--warning .lucide { color: var(--warning-icon); }
 .toast--info .lucide    { color: var(--info-icon); }
+
+/* ---------- Alur Khusus Surat Humaira ---------- */
+.sad-message {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--primary-red);
+  margin-top: var(--space-4);
+  min-height: 24px;
+  animation: retroBounce 0.4s infinite alternate;
+}
+
+@keyframes retroBounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-3px); }
+}
+
+.calendar-wrapper {
+  background-color: var(--bg-input);
+  border: var(--border-thick) solid var(--border-color);
+  padding: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.calendar-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-day-header {
+  font-weight: 700;
+  text-align: center;
+  padding: 4px 0;
+  font-size: var(--text-sm);
+  color: var(--primary-orange);
+}
+
+.calendar-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-thin) solid var(--border-color);
+  background-color: var(--bg-input);
+  cursor: pointer;
+  font-size: var(--text-base);
+  font-weight: 700;
+  transition: all var(--duration-fast) ease;
+}
+
+.calendar-cell:hover:not(.empty-cell):not(.disabled-cell) {
+  background-color: var(--warning-bg);
+}
+
+.calendar-cell.selected {
+  background-color: var(--primary-green) !important;
+  color: var(--text-light);
+  box-shadow: inset 2px 2px 0px rgba(0,0,0,0.2);
+}
+
+.calendar-cell.empty-cell {
+  border: none;
+  background: transparent;
+  cursor: default;
+}
+
+.calendar-cell.disabled-cell {
+  background-color: var(--bg-primary);
+  color: var(--text-muted);
+  text-decoration: line-through;
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.toast-message {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--success-icon);
+  height: 20px;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.btn-small-nav {
+  padding: 4px 12px !important;
+  min-height: 32px !important;
+}
+
+.link-reset {
+  display: inline-block;
+  margin-top: var(--space-3);
+  color: var(--text-muted);
+  text-decoration: underline;
+  font-size: var(--text-sm);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+}
+.link-reset:hover {
+  color: var(--text-main);
+}
+
+/* Scoped layout helper untuk halaman surat */
+.retro-letter-layout {
+  display: flex;
+  flex-direction: column;
+}
+
+.retro-letter-layout .text-justify {
+  text-align: justify;
+}
+
+.retro-letter-layout .space-y-4 > * + * {
+  margin-top: var(--space-4);
+}
+
+.retro-letter-layout .space-y-6 > * + * {
+  margin-top: var(--space-6);
+}
+
+.retro-letter-layout .divider-dashed {
+  border-top: 2px dashed var(--text-muted);
+  margin: var(--space-4) 0;
+}
+
