@@ -182,6 +182,14 @@ document.addEventListener('DOMContentLoaded', () => {
     qrName.textContent = student.name;
     qrClass.textContent = `Kelas: ${student.class} | ID: ${student.id}`;
 
+    if (isHumaira(student)) {
+      document.body.classList.add('special-humaira');
+      generateCuteOrnaments();
+    } else {
+      document.body.classList.remove('special-humaira');
+      clearCuteOrnaments();
+    }
+
     // Sembunyikan form card, tampilkan QR card
     absentForm.closest('.card').classList.add('hidden');
     qrSection.classList.remove('hidden');
@@ -317,9 +325,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function startHumairaFlow(student) {
     activeHumairaStudent = student;
+    document.body.classList.add('special-humaira');
+    generateCuteOrnaments();
     absentForm.closest('.card').classList.add('hidden');
     retroLetterSection.classList.remove('hidden');
     resetRetroApp();
+  }
+
+  // Pixel-style SVG icons (Hearts, Stars, Flowers)
+  const pixelHeartSVG = `<svg viewBox="0 0 8 8"><path d="M1 2h1v1h-1zM2 1h2v1h-2zM4 2h1v1h-1zM5 1h2v1h-2zM7 2h1v1h-1zM1 3h7v1h-7zM2 4h5v1h-5zM3 5h3v1h-3zM4 6h1v1h-1z" /></svg>`;
+  const pixelStarSVG = `<svg viewBox="0 0 8 8"><path d="M3 0h2v1h-2zM3 1h2v1h-2zM1 2h6v1h-6zM0 3h8v1h-8zM1 4h6v1h-6zM2 5h4v1h-4zM2 6h1v1h-1zM5 6h1v1h-1zM1 7h1v1h-1zM6 7h1v1h-1z" /></svg>`;
+  const pixelFlowerSVG = `<svg viewBox="0 0 8 8"><path d="M3 1h2v1h-2zM1 3h2v1h-2zM5 3h2v1h-2zM3 5h2v1h-2z" /></svg>`;
+
+  function generateCuteOrnaments() {
+    const container = document.getElementById('qr-ornaments-container');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    const svgs = [pixelHeartSVG, pixelStarSVG, pixelFlowerSVG];
+    const positions = [
+      { top: '-25px', left: '-25px', delay: '0s' },
+      { top: '30px', right: '-25px', delay: '1s' },
+      { bottom: '50px', left: '-30px', delay: '0.5s' },
+      { bottom: '-20px', right: '-20px', delay: '1.5s' },
+      { top: '50%', left: '-35px', delay: '2s' },
+      { bottom: '30%', right: '-30px', delay: '0.7s' }
+    ];
+
+    positions.forEach((pos, idx) => {
+      const el = document.createElement('div');
+      el.className = 'cute-ornament';
+      el.innerHTML = svgs[idx % svgs.length];
+      if (pos.top) el.style.top = pos.top;
+      if (pos.left) el.style.left = pos.left;
+      if (pos.right) el.style.right = pos.right;
+      if (pos.bottom) el.style.bottom = pos.bottom;
+      el.style.animationDelay = pos.delay;
+      container.appendChild(el);
+    });
+  }
+
+  function clearCuteOrnaments() {
+    const container = document.getElementById('qr-ornaments-container');
+    if (container) container.innerHTML = '';
   }
 
   function changeMonth(direction) {
@@ -384,6 +432,9 @@ document.addEventListener('DOMContentLoaded', () => {
           
           selectedDateObject = { day: day, month: monthNames[currentMonthIndex], year: currentYear };
           retroSelectedDateDisp.innerText = `Tanggal terpilih: ${day} ${monthNames[currentMonthIndex]} ${currentYear}`;
+          
+          // Munculkan tombol kegiatan sesuai instruksi
+          document.getElementById('retro-activities-container').classList.remove('hidden');
         });
       }
 
@@ -391,6 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dayCell.classList.add('selected');
         selectedDateObject = { day: 14, month: 'Juni', year: 2026 };
         retroSelectedDateDisp.innerText = `Tanggal terpilih: 14 Juni 2026`;
+        document.getElementById('retro-activities-container').classList.remove('hidden');
       } else if (selectedDateObject && selectedDateObject.day === day && selectedDateObject.month === monthNames[currentMonthIndex] && selectedDateObject.year === currentYear) {
         dayCell.classList.add('selected');
       }
@@ -430,16 +482,48 @@ document.addEventListener('DOMContentLoaded', () => {
     buildCalendar(); 
   }
 
-  function copyToClipboard() {
+  // Track pesan yang sedang aktif
+  let currentMessageText = "";
+
+  function selectActivity(activityType) {
     let dateText = "[pilih tanggal]";
     if (selectedDateObject) {
       dateText = `${selectedDateObject.day} ${selectedDateObject.month}`;
     }
 
-    const textToCopy = `Ayo ketemuan tanggal ${dateText}, kosongin jadwal ya!`;
-    
+    let activityText = "";
+    if (activityType === 'nonton') activityText = "nonton film";
+    else if (activityType === 'cafe') activityText = "ke cafe";
+    else if (activityType === 'krb') activityText = "ke KRB";
+    else if (activityType === 'dufan') activityText = "ke Dufan";
+    else if (activityType === 'arcade') activityText = "main arcade";
+    else if (activityType === 'kuliner') activityText = "kulineran";
+
+    // Pesan dari Humaira ke orang lain (bukan dialamatkan ke Humaira)
+    currentMessageText = `Ayo ${activityText} tanggal ${dateText}!`;
+
+    // Highlight tombol yang dipilih
+    document.querySelectorAll('.activity-btn').forEach(b => b.classList.remove('activity-btn--selected'));
+    const selectedBtn = document.querySelector(`.activity-btn[data-activity="${activityType}"]`);
+    if (selectedBtn) selectedBtn.classList.add('activity-btn--selected');
+
+    // Tampilkan preview pesan
+    const msgPreview = document.getElementById('retro-msg-preview');
+    const msgText = document.getElementById('retro-msg-text');
+    if (msgPreview && msgText) {
+      msgText.textContent = currentMessageText;
+      msgPreview.classList.remove('hidden');
+    }
+
+    // Tampilkan tombol salin
+    retroBtnCopy.classList.remove('hidden');
+  }
+
+  function copyToClipboard() {
+    if (!currentMessageText) return;
+
     const tempTextArea = document.createElement("textarea");
-    tempTextArea.value = textToCopy;
+    tempTextArea.value = currentMessageText;
     tempTextArea.style.top = "0";
     tempTextArea.style.left = "0";
     tempTextArea.style.position = "fixed";
@@ -472,13 +556,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function resetRetroApp() {
     clickCount = 0;
+    currentMessageText = "";
     retroBtnYa.style.transform = "scale(1)";
     retroBtnTidak.style.transform = "scale(1)";
     retroBtnTidak.style.opacity = '1';
     retroBtnTidak.style.pointerEvents = 'auto';
     retroSadMessage.innerText = "";
     selectedDateObject = null;
+    retroSelectedDateDisp.innerText = "Pilih salah satu tanggal di atas!";
     
+    document.getElementById('retro-activities-container').classList.add('hidden');
+    document.getElementById('retro-msg-preview').classList.add('hidden');
+    retroBtnCopy.classList.add('hidden');
+    document.querySelectorAll('.activity-btn').forEach(b => b.classList.remove('activity-btn--selected'));
     retroSuccessPage.classList.add('hidden');
     retroLetterPage.classList.remove('hidden');
   }
@@ -490,4 +580,12 @@ document.addEventListener('DOMContentLoaded', () => {
   retroBtnNextMonth.addEventListener('click', () => changeMonth(1));
   retroBtnCopy.addEventListener('click', copyToClipboard);
   retroBtnReset.addEventListener('click', resetRetroApp);
+
+  // Bind Activity Buttons Events
+  document.querySelectorAll('.activity-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const activity = btn.getAttribute('data-activity');
+      selectActivity(activity);
+    });
+  });
 });

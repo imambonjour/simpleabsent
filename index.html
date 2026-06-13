@@ -168,7 +168,27 @@
 
             <!-- Tombol Salin dan Kembali -->
             <div class="retro-letter-layout space-y-3 text-center" style="display: flex; flex-direction: column; align-items: center;">
-              <button type="button" id="retro-btn-copy" class="btn btn--primary btn--full" style="flex-direction: column; height: auto; padding: 12px 24px; gap: 4px;">
+              <!-- Container Tombol Pilihan Kegiatan -->
+              <div id="retro-activities-container" class="hidden w-full">
+                <p style="font-size: var(--text-sm); font-weight: bold; margin-bottom: var(--space-2); text-transform: none; color: var(--text-main);">Mau kegiatan apa?</p>
+                <div class="activities-grid">
+                  <button type="button" class="activity-btn" data-activity="nonton" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;"><i data-lucide="film"></i> Nonton</button>
+                  <button type="button" class="activity-btn" data-activity="cafe" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;"><i data-lucide="coffee"></i> Ke Cafe</button>
+                  <button type="button" class="activity-btn" data-activity="krb" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;"><i data-lucide="trees"></i> Ke KRB</button>
+                  <button type="button" class="activity-btn" data-activity="dufan" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;"><i data-lucide="sparkles"></i> Ke Dufan</button>
+                  <button type="button" class="activity-btn" data-activity="arcade" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;"><i data-lucide="gamepad-2"></i> Arcade</button>
+                  <button type="button" class="activity-btn" data-activity="kuliner" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;"><i data-lucide="utensils"></i> Kulineran</button>
+                </div>
+              </div>
+
+              <!-- Preview Pesan (muncul setelah pilih kegiatan) -->
+              <div id="retro-msg-preview" class="hidden" style="width: 100%; margin-top: var(--space-3); border: 2px solid var(--border-color); background: var(--bg-input); padding: var(--space-3); text-align: left;">
+                <p style="font-size: var(--text-xs); color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">Preview pesan:</p>
+                <p id="retro-msg-text" style="font-size: var(--text-sm); color: var(--text-main); text-transform: none; letter-spacing: normal; font-style: italic;"></p>
+              </div>
+
+              <!-- Tombol Salin Pesan (muncul setelah pilih kegiatan) -->
+              <button type="button" id="retro-btn-copy" class="btn btn--primary btn--full hidden" style="flex-direction: column; height: auto; padding: 12px 24px; gap: 4px; margin-top: var(--space-2);">
                 <span style="font-weight: 700; font-size: var(--text-md); text-transform: none; letter-spacing: normal;">Salin Pesan WhatsApp</span>
                 <span style="font-size: var(--text-xs); font-weight: normal; opacity: 0.8; text-transform: lowercase; letter-spacing: normal;">(i gonna pretend to be surprised)</span>
               </button>
@@ -185,6 +205,8 @@
 
       <!-- QR Code Result Section (hidden by default) -->
       <section id="qr-section" class="card hidden">
+        <!-- Container Ornamen Khusus -->
+        <div id="qr-ornaments-container" class="ornaments-wrapper"></div>
         <div class="qr-container">
           <div class="qr-frame" id="qr-frame">
             <div id="qr-code"></div>

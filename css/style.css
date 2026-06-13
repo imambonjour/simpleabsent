@@ -1107,3 +1107,95 @@ select.form-input {
   margin: var(--space-4) 0;
 }
 
+/* ---------- Kustomisasi Khusus Humaira & Ornamen ---------- */
+body.special-humaira {
+  --bg-primary: #FFE4E1; /* Misty Rose */
+  --bg-card: #FFF0F5; /* Lavender Blush */
+  --bg-input: #FFFFFF;
+  --border-color: #FF69B4; /* Hot Pink */
+  --primary-orange: #FF1493; /* Deep Pink */
+  --primary-green: #FF69B4;
+  --primary-blue: #FFB6C1;
+  --text-main: #C71585; /* Medium Violet Red */
+  --text-muted: #DB7093; /* Pale Violet Red */
+  --warning-bg: #FFF0F5;
+}
+
+body.special-humaira .blob {
+  background: var(--primary-blue) !important;
+  opacity: 0.25 !important;
+}
+
+.ornaments-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 10;
+}
+
+.cute-ornament {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  animation: cuteFloat 4s ease-in-out infinite alternate;
+}
+
+.cute-ornament svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--primary-orange);
+}
+
+@keyframes cuteFloat {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-15px) rotate(15deg);
+  }
+}
+
+/* ---------- Tombol Pilihan Kegiatan ---------- */
+.activities-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  width: 100%;
+}
+
+.activity-btn {
+  background-color: var(--bg-card);
+  border: var(--border-thin) solid var(--border-color);
+  padding: var(--space-3) var(--space-2);
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--text-main);
+  text-transform: uppercase;
+  transition: all var(--duration-fast) ease;
+}
+
+.activity-btn:hover {
+  background-color: var(--primary-blue);
+  color: var(--text-light);
+  transform: translate(-1px, -1px);
+}
+
+.activity-btn:active {
+  transform: translate(1px, 1px);
+}
+
+.activity-btn--selected {
+  background-color: var(--primary-orange);
+  color: var(--text-light);
+  border-color: var(--border-color);
+}
+
+
