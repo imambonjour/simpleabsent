@@ -22,6 +22,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const successDetail  = document.getElementById('success-detail');
   const btnAddAnother  = document.getElementById('btn-add-another');
 
+  // Face verification elements
+  const faceSection     = document.getElementById('face-section');
+  const faceStudentName = document.getElementById('face-student-name');
+  const faceVideo       = document.getElementById('face-video');
+  const faceCamera      = document.getElementById('face-camera');
+  const faceStatus      = document.getElementById('face-status');
+  const faceSuccessMark = document.getElementById('face-success-mark');
+  const btnCancelFace   = document.getElementById('btn-cancel-face');
+  const btnStartFace    = document.getElementById('btn-start-face');
+
   // QR result elements
   const qrSection      = document.getElementById('qr-section');
   const qrCode         = document.getElementById('qr-code');
@@ -50,6 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentYear = 2026;
   let currentMonthIndex = 5; // Juni
   let activeHumairaStudent = null;
+  let pendingFaceStudent = null;
+  let faceStream = null;
+  let isVerifyingFace = false;
 
   const monthNames = [
     "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -104,6 +117,180 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    hideError();
+    pendingFaceStudent = student;
+    openFaceVerification(student);
+  });
+
+  btnStartFace.addEventListener('click', async () => {
+    if (!pendingFaceStudent || isVerifyingFace) return;
+    await runFaceVerification(pendingFaceStudent);
+  });
+
+  btnCancelFace.addEventListener('click', () => {
+    closeFaceVerification();
+    absentForm.closest('.card').classList.remove('hidden');
+    inputName.focus();
+  });
+
+  btnAddAnother.addEventListener('click', () => {
+    successSection.classList.add('hidden');
+    inputClass.focus();
+  });
+
+  btnBack.addEventListener('click', () => {
+    qrSection.classList.add('hidden');
+    closeFaceVerification();
+    absentForm.closest('.card').classList.remove('hidden');
+    absentForm.reset();
+    resetNameSelector();
+    inputClass.focus();
+  });
+
+  // ── Face verification flow ─────────────────────────────────────────────────
+  async function openFaceVerification(student) {
+    absentForm.closest('.card').classList.add('hidden');
+    qrSection.classList.add('hidden');
+    successSection.classList.add('hidden');
+    faceSection.classList.remove('hidden');
+    faceStudentName.textContent = student.name;
+    faceStatus.textContent = 'Menyiapkan kamera...';
+    faceCamera.classList.remove('face-camera--scanning', 'face-camera--verified');
+    faceSuccessMark.classList.add('hidden');
+    btnStartFace.disabled = true;
+    btnCancelFace.disabled = false;
+
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+
+    try {
+      await startFaceCamera();
+      faceStatus.textContent = 'Arahkan wajah ke kamera, lalu mulai scan.';
+      btnStartFace.disabled = false;
+      btnStartFace.focus();
+    } catch (err) {
+      console.error('[student] camera error:', err);
+      faceStatus.textContent = getCameraErrorMessage(err);
+      btnStartFace.disabled = true;
+    }
+  }
+
+  async function startFaceCamera() {
+    stopFaceCamera();
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('Kamera tidak didukung browser ini.');
+    }
+
+    faceStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: 'user',
+        width: { ideal: 640 },
+        height: { ideal: 640 },
+      },
+      audio: false,
+    });
+
+    faceVideo.srcObject = faceStream;
+    await faceVideo.play();
+  }
+
+  async function runFaceVerification(student) {
+    isVerifyingFace = true;
+    btnStartFace.disabled = true;
+    btnCancelFace.disabled = true;
+    faceCamera.classList.add('face-camera--scanning');
+    faceStatus.textContent = 'Memindai titik wajah...';
+
+    try {
+      await delay(1200);
+      faceStatus.textContent = 'Mencocokkan identitas...';
+      const imageBlob = await captureFaceImage();
+      await uploadFaceImage(student, imageBlob);
+
+      faceStatus.textContent = 'Wajah terverifikasi.';
+      faceCamera.classList.remove('face-camera--scanning');
+      faceCamera.classList.add('face-camera--verified');
+      faceSuccessMark.classList.remove('hidden');
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+
+      await delay(900);
+      closeFaceVerification();
+      await saveAttendance(student);
+    } catch (err) {
+      console.error('[student] face verification error:', err);
+      faceCamera.classList.remove('face-camera--scanning', 'face-camera--verified');
+      faceSuccessMark.classList.add('hidden');
+      faceStatus.textContent = getFaceErrorMessage(err);
+      btnStartFace.disabled = false;
+      btnCancelFace.disabled = false;
+    } finally {
+      isVerifyingFace = false;
+    }
+  }
+
+  async function captureFaceImage() {
+    if (!faceVideo.videoWidth || !faceVideo.videoHeight) {
+      throw new Error('Kamera belum siap.');
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = faceVideo.videoWidth;
+    canvas.height = faceVideo.videoHeight;
+    const context = canvas.getContext('2d');
+    context.drawImage(faceVideo, 0, 0, canvas.width, canvas.height);
+
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('Gagal mengambil gambar.'));
+          return;
+        }
+        resolve(blob);
+      }, 'image/jpeg', 0.82);
+    });
+  }
+
+  async function uploadFaceImage(student, imageBlob) {
+    const db = getDB();
+    if (!db) throw new Error('Supabase belum dikonfigurasi.');
+
+    const safeId = String(student.id).replace(/[^a-z0-9_-]/gi, '-');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filePath = `${student.class}/${safeId}-${timestamp}.jpg`;
+    const { error } = await db.storage
+      .from('face')
+      .upload(filePath, imageBlob, {
+        contentType: 'image/jpeg',
+        upsert: false,
+      });
+
+    if (error) throw error;
+  }
+
+  function closeFaceVerification() {
+    stopFaceCamera();
+    faceSection.classList.add('hidden');
+    faceCamera.classList.remove('face-camera--scanning', 'face-camera--verified');
+    faceSuccessMark.classList.add('hidden');
+    btnStartFace.disabled = false;
+    btnCancelFace.disabled = false;
+    isVerifyingFace = false;
+    pendingFaceStudent = null;
+  }
+
+  function stopFaceCamera() {
+    if (faceStream) {
+      faceStream.getTracks().forEach(track => track.stop());
+      faceStream = null;
+    }
+    faceVideo.srcObject = null;
+  }
+
+  async function saveAttendance(student) {
     setLoading(true);
     hideError();
 
@@ -139,25 +326,13 @@ document.addEventListener('DOMContentLoaded', () => {
       resetNameSelector();
     } catch (err) {
       console.error('[student] submit error:', err);
+      absentForm.closest('.card').classList.remove('hidden');
       showError(getSubmitErrorMessage(err));
       showToast('Gagal menyimpan absensi', 'error');
     } finally {
       setLoading(false);
     }
-  });
-
-  btnAddAnother.addEventListener('click', () => {
-    successSection.classList.add('hidden');
-    inputClass.focus();
-  });
-
-  btnBack.addEventListener('click', () => {
-    qrSection.classList.add('hidden');
-    absentForm.closest('.card').classList.remove('hidden');
-    absentForm.reset();
-    resetNameSelector();
-    inputClass.focus();
-  });
+  }
 
   // ── Generate and display QR code ───────────────────────────────────────────
   function showQRCode(student) {
@@ -292,6 +467,29 @@ document.addEventListener('DOMContentLoaded', () => {
       return 'Tabel QR belum dibuat di Supabase.';
     }
     return 'Terjadi kesalahan saat menyimpan. Periksa koneksi dan setup Supabase.';
+  }
+
+  function getCameraErrorMessage(err) {
+    if (err && err.name === 'NotAllowedError') {
+      return 'Izin kamera ditolak. Aktifkan izin kamera untuk lanjut.';
+    }
+    if (err && err.name === 'NotFoundError') {
+      return 'Kamera tidak ditemukan di perangkat ini.';
+    }
+    return 'Kamera tidak bisa dibuka. Coba refresh halaman.';
+  }
+
+  function getFaceErrorMessage(err) {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      return 'Supabase belum diset. Upload wajah tidak bisa dilakukan.';
+    }
+    if (err && /row-level security|violates row-level/i.test(err.message || '')) {
+      return 'Upload ditolak RLS. Jalankan policy bucket "face" di setup_qr_table.sql.';
+    }
+    if (err && /bucket/i.test(err.message || '')) {
+      return 'Bucket Supabase "face" belum tersedia atau belum bisa diakses.';
+    }
+    return 'Verifikasi gagal. Coba scan ulang.';
   }
 
   function showError(message) {

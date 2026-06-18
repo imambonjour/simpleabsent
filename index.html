@@ -81,6 +81,38 @@
         </form>
       </section>
 
+      <section id="face-section" class="card hidden" aria-live="polite">
+        <div class="face-verification">
+          <div class="face-verification__header">
+            <div class="face-verification__icon" aria-hidden="true"><i data-lucide="scan-face"></i></div>
+            <div>
+              <h2 class="face-verification__title">Verifikasi Wajah</h2>
+              <p class="face-verification__student" id="face-student-name"></p>
+            </div>
+          </div>
+
+          <div class="face-camera" id="face-camera">
+            <video id="face-video" class="face-camera__video" autoplay muted playsinline></video>
+            <div class="face-camera__frame" aria-hidden="true"></div>
+            <div class="face-camera__scanline" aria-hidden="true"></div>
+            <div class="face-camera__success hidden" id="face-success-mark" aria-hidden="true">
+              <i data-lucide="check"></i>
+            </div>
+          </div>
+
+          <div class="face-status" id="face-status">Menyiapkan kamera...</div>
+
+          <div class="face-actions">
+            <button type="button" id="btn-cancel-face" class="btn btn--outline btn--sm">
+              <i data-lucide="arrow-left"></i> Batal
+            </button>
+            <button type="button" id="btn-start-face" class="btn btn--primary btn--sm">
+              <i data-lucide="scan-line"></i> Mulai Scan
+            </button>
+          </div>
+        </div>
+      </section>
+
       <section id="success-section" class="card hidden" aria-live="polite">
         <div class="scan-result scan-result--success">
           <div class="scan-result__icon" aria-hidden="true"><i data-lucide="check-circle-2"></i></div>

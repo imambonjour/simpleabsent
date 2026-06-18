@@ -99,6 +99,27 @@ $$;
 -- TO anon
 -- USING (true);
 
+-- 7. Storage bucket for fake face verification captures
+-- Run this section too if index.html uploads fail with:
+-- "new row violates row-level security policy"
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('face', 'face', false, 5242880, ARRAY['image/jpeg'])
+ON CONFLICT (id) DO UPDATE
+SET
+  name = EXCLUDED.name,
+  public = EXCLUDED.public,
+  file_size_limit = EXCLUDED.file_size_limit,
+  allowed_mime_types = EXCLUDED.allowed_mime_types;
+
+DROP POLICY IF EXISTS "Allow anon uploads to face bucket"
+ON storage.objects;
+
+CREATE POLICY "Allow anon uploads to face bucket"
+ON storage.objects
+FOR INSERT
+TO anon
+WITH CHECK (bucket_id = 'face');
+
 -- ========================================
 -- Usage Instructions:
 -- ========================================
